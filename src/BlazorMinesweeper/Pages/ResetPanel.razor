@@ -1,0 +1,24 @@
+﻿@using BlazorMinesweeper.Models
+
+<div class="resetPanel">
+    <button @onclick="() => Board.Reset()">
+        @(Board.State switch
+        {
+            GameState.Ready => @<img src="images/Ready.png" />,
+            GameState.Started => @<img src="images/Started.png" />,
+            GameState.Won => @<img src="images/Won.png" />,
+            GameState.Lost => @<img src="images/Lost.png" />,
+            _ => @<img src= "images/Ready.png" />
+        })
+    </button>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public Board Board { get; set; } = default!;
+
+    override protected void OnParametersSet()
+    {
+        Board.OnStateChange += () => StateHasChanged();
+    }
+}

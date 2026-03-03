@@ -1,0 +1,22 @@
+﻿@using BlazorMinesweeper.Models
+
+<table class="mineField" cellspacing="0" cellpadding="0">
+    <tbody>
+        @for (int y = Board.MinRow; y <= Board.MaxRow; y++)
+        {
+            <tr>
+                @for (int x = Board.MinCol; x < Board.MaxCol; x++)
+                {
+                    <td class="fieldCell">
+                        <SquarePanel Board="@Board" Square="@Board.GetSquare(x, y)" />
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter, EditorRequired]
+    public Board Board { get; set; } = default!;
+}

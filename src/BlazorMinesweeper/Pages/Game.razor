@@ -1,0 +1,48 @@
+﻿@using BlazorMinesweeper.Models
+@implements IDisposable
+<ImagePreloader />
+
+<h3>MineField</h3>
+
+<table class="mainTable" cellspacing="0" cellpadding="0">
+    <thead>
+        <tr>
+            <td>
+                <div class="headerPanel">
+                    <table cellspacing="0" cellpadding="0" style="width:100%">
+                        <tr>
+                            <td>
+                                <FlagDisplay Board="@Board" />
+                            </td>
+                            <td>
+                                <ResetPanel Board="@Board" />
+                            </td>
+                            <td>
+                                <TimerPanel BoardTimer="@Board.Timer" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+           <td>
+                <MineField Board="@Board" />
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+@code {
+    public Board Board { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        Board = new Board(10, 10);
+        Board.PutMines(5, true);
+    }
+
+    public void Dispose() => Board?.Dispose();
+}

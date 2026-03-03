@@ -1,0 +1,44 @@
+﻿@using BlazorMinesweeper.Models
+
+<div class="timerPanel">
+    <img src="images/ClockLabel.png" />
+    <img src="images/Counter@(minutesDigit1).png" />
+    <img src="images/Counter@(minutesDigit2).png" />
+    @if(pointsFlag)
+    {
+        <img src="images/PointsLight.png" />
+    }
+    else
+    {
+        <img src="images/PointsDark.png" />
+    }
+    <img src="images/Counter@(secondsDigit1).png" />
+    <img src="images/Counter@(secondsDigit2).png" />
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public BoardTimer BoardTimer { get; set; } = default!;
+
+    private int secondsDigit1;
+    private int secondsDigit2;
+    private int minutesDigit1;
+    private int minutesDigit2;
+    private bool pointsFlag;
+
+    override protected void OnParametersSet()
+    {
+        BoardTimer.OnElapsedTime += () =>
+        {
+            var elapsedTime = BoardTimer.ElapsedTime;
+
+            secondsDigit1 = elapsedTime.Seconds / 10;
+            secondsDigit2 = elapsedTime.Seconds % 10;
+            minutesDigit1 = elapsedTime.Minutes / 10;
+            minutesDigit2 = elapsedTime.Minutes % 10;
+            pointsFlag = elapsedTime.Milliseconds >= 500;
+
+            StateHasChanged();
+        };
+    }
+}

@@ -1,0 +1,18 @@
+﻿@using BlazorMinesweeper.Models
+
+<div class="flagDisplay">
+    <img src="images/MineLabel.png" />
+    <img src="images/Counter@(Board.RemainingFlags / 100).png" />
+    <img src="images/Counter@((Board.RemainingFlags / 10) % 10).png" />
+    <img src="images/Counter@(Board.RemainingFlags % 100).png" />
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public Board Board { get; set; } = default!;
+
+    override protected void OnParametersSet()
+    {
+        Board.OnFlagCountChange += () => StateHasChanged();
+    }
+}

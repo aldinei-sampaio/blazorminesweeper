@@ -1,0 +1,94 @@
+﻿@using BlazorMinesweeper.Models
+
+@if(Square.DisplayMode == SquareDisplayMode.Normal)
+{
+    <div class="@GetTipClass()" @onmouseup="OnClosedMouseUp" @oncontextmenu:preventDefault="true">&nbsp;</div>
+    return;
+}
+
+@if(Square.DisplayMode == SquareDisplayMode.Empty)
+{
+    <div>&nbsp;</div>
+    return;
+}
+
+@if(Square.DisplayMode == SquareDisplayMode.Exploded)
+{
+    <img src="images/Mine.png" class="exploded" />
+    return;
+}
+
+@if (Square.DisplayMode == SquareDisplayMode.Mine)
+{
+    <img src="images/Mine.png" class="openned" />
+    return;
+}
+
+@if (Square.DisplayMode == SquareDisplayMode.Flag)
+{
+    <img src="images/Flag.png" />
+    return;
+}
+
+@if (Square.DisplayMode == SquareDisplayMode.Unknown)
+{
+    <img src="images/Unknown.png" />
+    return;
+}
+
+@if (Square.DisplayMode == SquareDisplayMode.NumberActive)
+{
+    <div @onmouseup="OnOpennedMouseUp" @onmouseup:preventDefault="true">
+        <img src="images/@(Square.DisplayNumber).png" />
+    </div>
+    return;
+}
+
+@if (Square.DisplayMode == SquareDisplayMode.NumberInactive)
+{
+    <img src="images/@(Square.DisplayNumber)a.png" />
+    return;
+}
+
+@if (Square.DisplayMode == SquareDisplayMode.WrongFlag)
+{
+    <img src="images/WrongFlag.png" />
+    return;
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public Board Board { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public Square Square { get; set; } = default!;
+
+    protected override void OnParametersSet()
+    {
+        Square.OnUpdate += StateHasChanged;
+    }
+
+    private string GetTipClass()
+    {
+        return Square.TipType switch
+        {
+            TipType.Mine => "tip_mine",
+            TipType.Safe => "tip_safe",
+            _ => string.Empty
+        };
+    }
+
+    private void OnOpennedMouseUp(MouseEventArgs args)
+    {
+        if (args.Buttons == 3)
+            Board.OpenNeighborhood(Square);
+    }
+
+    private void OnClosedMouseUp(MouseEventArgs args)
+    {
+        if (args.Button == 0)
+            Board.Open(Square);
+        else if (args.Button == 2)
+            Board.ToggleState(Square);
+    }
+}
