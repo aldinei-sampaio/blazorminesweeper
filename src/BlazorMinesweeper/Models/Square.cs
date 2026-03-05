@@ -1,6 +1,6 @@
 ﻿namespace BlazorMinesweeper.Models;
 
-public sealed class Square(int row, int col, int neighborsCount) : IDisposable
+public sealed class Square(int row, int column, int neighborsCount) : IDisposable
 {
     private bool _isOpenned = false;
     private bool _isRevealed = false;
@@ -15,9 +15,9 @@ public sealed class Square(int row, int col, int neighborsCount) : IDisposable
     public int DisplayNumber { get; set; } = 0;
     public bool HasNeighborsClosed => _neighborsClosed > 0;
     public SquareState State => _state;
-    public bool IsOpenned => _isOpenned;
+    public bool IsOpen => _isOpenned;
     public int Row => row;
-    public int Col => col;
+    public int Column => column;
     public TipType TipType
     {
         get => _tipType;

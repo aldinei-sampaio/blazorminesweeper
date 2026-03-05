@@ -1,6 +1,7 @@
 ﻿@using BlazorMinesweeper.Models
+@implements IDisposable
 
-<div class="timerPanel">
+<div class="timerPanel" title="Tempo decorrido">
     <img src="images/ClockLabel.png" />
     <img src="images/Counter@(minutesDigit1).png" />
     <img src="images/Counter@(minutesDigit2).png" />
@@ -28,17 +29,22 @@
 
     override protected void OnParametersSet()
     {
-        BoardTimer.OnElapsedTime += () =>
-        {
-            var elapsedTime = BoardTimer.ElapsedTime;
+        BoardTimer.OnElapsedTime += OnElapsedTime;
+    }
 
-            secondsDigit1 = elapsedTime.Seconds / 10;
-            secondsDigit2 = elapsedTime.Seconds % 10;
-            minutesDigit1 = elapsedTime.Minutes / 10;
-            minutesDigit2 = elapsedTime.Minutes % 10;
-            pointsFlag = elapsedTime.Milliseconds >= 500;
+    private void OnElapsedTime()
+    {
+        var elapsedTime = BoardTimer.ElapsedTime;
+        secondsDigit1 = elapsedTime.Seconds / 10;
+        secondsDigit2 = elapsedTime.Seconds % 10;
+        minutesDigit1 = elapsedTime.Minutes / 10;
+        minutesDigit2 = elapsedTime.Minutes % 10;
+        pointsFlag = elapsedTime.Milliseconds >= 500;
+        StateHasChanged();
+    }
 
-            StateHasChanged();
-        };
+    public void Dispose()
+    {
+        BoardTimer.OnElapsedTime -= OnElapsedTime;
     }
 }

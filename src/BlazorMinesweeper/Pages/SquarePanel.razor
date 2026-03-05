@@ -1,4 +1,5 @@
 ﻿@using BlazorMinesweeper.Models
+@implements IDisposable
 
 @if(Square.DisplayMode == SquareDisplayMode.Normal)
 {
@@ -90,5 +91,10 @@
             Board.Open(Square);
         else if (args.Button == 2)
             Board.ToggleState(Square);
+    }
+
+    public void Dispose()
+    { 
+        Square.OnUpdate -= StateHasChanged;
     }
 }

@@ -1,19 +1,12 @@
-﻿using System.Diagnostics;
-
-namespace BlazorMinesweeper.Models;
+﻿namespace BlazorMinesweeper.Models;
 
 public sealed class Board : IDisposable
 {
-    private readonly Square[,] _squares;
-    private readonly int _rows = 0;
-    private readonly int _cols = 0;
-    private readonly int _minRow = 0;
-    private readonly int _minCol = 0;
-    private readonly int _maxRow = 0;
-    private readonly int _maxCol = 0;
-    private readonly int _squareCount = 0;
+    private BoardSetup _setup;
+    private bool _preventImediateWin;
+    private BoardSquares _boardSquares;
 
-    private int _openedCount = 0;
+    private int _openCount = 0;
     private GameState _state = GameState.Ready;
     private int _flaggedCount = 0;
     private int _mineCount = 0;
@@ -21,52 +14,48 @@ public sealed class Board : IDisposable
 
     public event Action? OnStateChange;
     public event Action? OnFlagCountChange;
+    public event Action? OnBoardChange;
 
     public BoardTimer Timer { get; } = new();
     public GameState State => _state;
 
-    public Board(int rows, int cols)
+    public Board(BoardSetup setup, bool preventImediateWin)
     {
-        if (rows <= 0 || cols <= 0)
-            throw new ArgumentException("rows e cols precisam ser maiores que zero");
-        
-        _squares = new Square[rows, cols];
-
-        _rows = rows;
-        _cols = cols;
-        _minRow = 0;
-        _maxRow = rows - 1;
-        _minCol = 0;
-        _maxCol = cols - 1;
-
-        _squareCount = rows * cols;
-
-        for (var i = _minRow; i <= _maxRow; i++)
-        {
-            var rowCorner = (i == _minRow || i == _maxRow);
-            for (var j = _minCol; j <= _maxCol; j++)
-            {
-                var colCorner = (j == _minCol || j == _maxCol);
-                var neighborCount = rowCorner ? (colCorner ? 3 : 5) : (colCorner ? 5 : 8);
-                _squares[i, j] = new Square(i, j, neighborCount);
-            }
-        }
+        _setup = setup;
+        _preventImediateWin = preventImediateWin;
+        _boardSquares = new(setup.Rows, setup.Columns);
+        Initialize();
     }
 
     public void Reset()
     {
-        Timer.Stop();
-        _openedCount = 0;
-        _flaggedCount = 0;
-        _putMinesLater = _mineCount;
-        _mineCount = 0;
-        for (var i = _minRow; i <= _maxRow; i++)
+        _boardSquares.Reset();
+        Initialize();
+    }
+
+    public void Reset(BoardSetup setup, bool preventImediateWin)
+    {
+        if (setup.Rows != _boardSquares.Rows || setup.Columns != _boardSquares.Columns)
         {
-            for (var j = _minCol; j <= _maxCol; j++)
-            {
-                _squares[i, j].Reset();
-            }
+            _boardSquares.Dispose();
+            _boardSquares = new BoardSquares(setup.Rows, setup.Columns);
         }
+        else
+        {
+            _boardSquares.Reset();
+        }
+        _setup = setup;
+        _preventImediateWin = preventImediateWin;
+        Initialize();
+    }
+
+    private void Initialize()
+    {
+        _openCount = 0;
+        _flaggedCount = 0;
+        _putMinesLater = 0;
+        _mineCount = 0;
+        PutMines();
         if (_state != GameState.Ready)
         {
             _state = GameState.Ready;
@@ -78,38 +67,25 @@ public sealed class Board : IDisposable
     {
         Timer.Dispose();
         OnStateChange = null;
-        for (var i = _minRow; i <= _maxRow; i++)
-        {
-            for (var j = _minCol; j <= _maxCol; j++)
-            {
-                _squares[i, j].Dispose();
-            }
-        }
+        _boardSquares.Dispose();
     }
 
     public int RemainingFlags => _mineCount + _putMinesLater - _flaggedCount;    
-    public int MinRow => _minRow;
-    public int MaxRow => _maxRow;
-    public int MinCol => _minCol;
-    public int MaxCol => _maxCol;
-    public int ColCount => _cols;
+    public int MinRow => _boardSquares.MinRow;
+    public int MaxRow => _boardSquares.MaxRow;
+    public int MinColumn => _boardSquares.MinColumn;
+    public int MaxColumn => _boardSquares.MaxColumn;
 
-    public Square GetSquare(int row, int col)
-    {
-        if (row < _minRow || row > _maxRow || col < _minCol || col > _maxCol)
-            throw new ArgumentException("Valor de row ou col inválido");
+    public Square this[int row, int column] => _boardSquares[row, column];
 
-        return _squares[row, col];
-    }
-
-    private int OpenableCount => _squareCount - _mineCount;
+    private int OpenableCount => _boardSquares.SquareCount - _mineCount;
         
-    public void PutMines(int mineCount, bool onFirstOpening)
+    private void PutMines()
     {
-        if (mineCount + _mineCount > OpenableCount - 9)
-            throw new ArgumentException("Não há espaço suficiente para o número de minas informado.");
-    
-        if (onFirstOpening) 
+        var maximumMines = BoardSetup.GetMaximumMines(_setup.Rows, _setup.Columns);
+        var mineCount = Math.Clamp(_setup.Mines, BoardSetup.Minimum.Mines, maximumMines);
+
+        if (_preventImediateWin) 
             _putMinesLater += mineCount;
         else
             PutAllMines(mineCount);
@@ -123,17 +99,17 @@ public sealed class Board : IDisposable
             do
             {
                 var (row, col) = GetRandomCoordinates();
-                square = GetSquare(row, col);
+                square = _boardSquares[row, col];
             } while (!ValidateSquare(square, exceptSquare));
             PutMine(square);
         }
     }
 
-    private static (int Row, int Col) GetRandomCoordinates()
+    private static (int Row, int Column) GetRandomCoordinates()
     {
         var row = Random.Shared.Next(0, 100);
-        var col = Random.Shared.Next(0, 100);
-        return (row, col);
+        var column = Random.Shared.Next(0, 100);
+        return (row, column);
     }
 
     private static bool ValidateSquare(Square square, Square? exceptSquare)
@@ -147,37 +123,22 @@ public sealed class Board : IDisposable
         return true;
     }
 
-    public void PutMine(Square square)
+    private void PutMine(Square square)
     {
         if (square.HasMine)
             return;
 
         square.HasMine = true;
         _mineCount++;
-        ForEachInVicinity(square, (item) => { item.DisplayNumber++; return false; });
+        _boardSquares.ForEachInVicinity(square, i => i.DisplayNumber++);
     }
 
     private static bool AreNeighbors(Square s1, Square s2)
     {
         return s2.Row >= s1.Row - 1
             && s2.Row <= s1.Row + 1
-            && s2.Col >= s1.Col - 1
-            && s2.Col <= s1.Col + 1;
-    }
-
-    private void ForEachInVicinity(Square item, Func<Square, bool> callbackfn)
-    {
-        for (var i = Math.Max(item.Row - 1, _minRow); i <= Math.Min(item.Row + 1, _maxRow); i++) 
-        {
-            for (var j = Math.Max(item.Col - 1, _minCol); j <= Math.Min(item.Col + 1, _maxCol); j++)
-            {
-                if (i == item.Row && j == item.Col)
-                    continue;
-                
-                if (callbackfn(GetSquare(i, j)))
-                    return;
-            }
-        }
+            && s2.Column >= s1.Column - 1
+            && s2.Column <= s1.Column + 1;
     }
         
     private void RegisterStart()
@@ -198,59 +159,54 @@ public sealed class Board : IDisposable
             _putMinesLater = 0;
         }
 
-        RegisterStart();
+        ProcessOpen(square);
+        OnBoardChange?.Invoke();
+    }
 
+    private void ProcessOpen(Square square)
+    {
+        RegisterStart();
         OpenSquare(square);
 
         if (square.HasMine)
         {
             Timer.Stop();
             _state = GameState.Lost;
-            Reveal();
+            _boardSquares.Reveal();
             OnStateChange?.Invoke();
             return;
         }
 
-        _openedCount++;
+        _openCount++;
 
         if (square.DisplayNumber == 0)
             OpenAllNeighbors(square);
         else
             OpenEmptyNeighbors(square);
 
-        if (_openedCount == OpenableCount)
+        if (_openCount == OpenableCount)
         {
             Timer.Stop();
             _state = GameState.Won;
             OnStateChange?.Invoke();
-        }
-    }
-
-    private void Reveal()
-    {
-        for (var i = _minRow; i <= _maxRow; i++)
-        {
-            for (var j = _minCol; j <= _maxCol; j++)
-            {
-                GetSquare(i, j).Reveal();
-            }
+            return;
         }
     }
 
     private void OpenSquare(Square square)
     {
         square.Open();
-        ForEachInVicinity(square, (i) => { i.DecrementNeighborsClosed(); return false; });
+        _boardSquares.ForEachInVicinity(square, i => i.DecrementNeighborsClosed());
     }
 
     private void OpenEmptyNeighbors(Square square) 
     {
-        ForEachInVicinity(square, (item) => 
+        _boardSquares.ForEachInVicinity(square, (item) => 
         {
-            if (!item.IsOpenned && item.State == SquareState.Normal && !item.HasMine && item.DisplayNumber == 0)
+            if (!item.IsOpen && item.State == SquareState.Normal && item.DisplayNumber == 0)
             {
                 OpenSquare(item);
-                _openedCount++;
+                _openCount++;
                 OpenAllNeighbors(item);
             }
             return (_state == GameState.Won || _state == GameState.Lost);
@@ -259,12 +215,12 @@ public sealed class Board : IDisposable
 
     private void OpenAllNeighbors(Square square)
     {
-        ForEachInVicinity(square, (item) => 
+        _boardSquares.ForEachInVicinity(square, (item) => 
         {
-            if (!item.IsOpenned && item.State == SquareState.Normal && !item.HasMine) 
+            if (!item.IsOpen && item.State == SquareState.Normal) 
             {
                 OpenSquare(item);
-                _openedCount++;
+                _openCount++;
                 if (item.DisplayNumber == 0)
                     OpenAllNeighbors(item);
             }
@@ -275,22 +231,27 @@ public sealed class Board : IDisposable
     public void OpenNeighborhood(Square square)
     {
         var flagsFound = 0;
-        ForEachInVicinity(square, (item) => 
+        _boardSquares.ForEachInVicinity(square, (item) => 
         {
-            if (!item.IsOpenned && item.State == SquareState.Flagged)
+            if (!item.IsOpen && item.State == SquareState.Flagged)
                 flagsFound++;
-            return false;
         });
 
         if (flagsFound < square.DisplayNumber)
             return;
 
-        ForEachInVicinity(square, (item) => 
+        var found = false;
+        _boardSquares.ForEachInVicinity(square, (item) => 
         {
-            if (!item.IsOpenned && item.State == SquareState.Normal)
-                Open(item);
-            return false;
+            if (!item.IsOpen && item.State == SquareState.Normal)
+            {
+                found = true;
+                ProcessOpen(item);
+            }
         });
+
+        if (found)
+            OnBoardChange?.Invoke();
     }
 
     public void ToggleState(Square square)
@@ -298,7 +259,7 @@ public sealed class Board : IDisposable
         if (square.State == SquareState.Flagged)
         {
             _flaggedCount--;
-            ForEachInVicinity(square, (i) => { i.IncrementNeighborsClosed(); return false; });
+            _boardSquares.ForEachInVicinity(square, i => i.IncrementNeighborsClosed());
             OnFlagCountChange?.Invoke();
         }
         else if (square.State == SquareState.Normal)
@@ -306,41 +267,50 @@ public sealed class Board : IDisposable
             if (RemainingFlags <= 0)
                 return;
             _flaggedCount++;
-            ForEachInVicinity(square, (i) => { i.DecrementNeighborsClosed(); return false; });
+            _boardSquares.ForEachInVicinity(square, i => i.DecrementNeighborsClosed());
             OnFlagCountChange?.Invoke();
+        }
+        else
+        {
+            return;
         }
         RegisterStart();
         square.ToggleState();
+        OnBoardChange?.Invoke();
     }
 
-    public Square? CreateTip()
+    public bool TryCreateTip()
     {
-        if (_openedCount == 0)
-            return null;
+        if (_openCount == 0)
+            return false;
 
-        var (row, col) = GetRandomCoordinates();
-        return TraverseFrom(row, col, CheckIfCanBeATip);
+        var (row, column) = GetRandomCoordinates();
+        var square = _boardSquares.Find(row, column, TryCreateTipInVincinity);
+        if (square is null)
+            return false;
+
+        OnBoardChange?.Invoke();
+        return true;
     }
 
-    private Square? CheckIfCanBeATip(Square square)
+    private Square? TryCreateTipInVincinity(Square square)
     {
-        if (!square.IsOpenned)
+        if (!square.IsOpen)
             return null;
 
         var flagCount = 0;
         var closedCount = 0;
         Square? candidate = null;
 
-        ForEachInVicinity(square, (square) => {
-            if (!square.IsOpenned)
+        _boardSquares.ForEachInVicinity(square, i => {
+            if (!square.IsOpen)
             {
                 closedCount++;
-                if (square.State == SquareState.Flagged)
+                if (i.State == SquareState.Flagged)
                     flagCount++;
-                else if (square.TipType == TipType.None)
-                    candidate = square;
+                else if (i.TipType == TipType.None)
+                    candidate = i;
             }
-            return false;
         });
 
         if (candidate is null)
@@ -356,31 +326,6 @@ public sealed class Board : IDisposable
         {
             candidate.TipType = TipType.Safe;
             return candidate;
-        }
-
-        return null;
-    }
-
-    private Square? TraverseFrom(int row, int col, Func<Square, Square?> callback)
-    {
-        for (var i = row; i <= _maxRow; i++)
-        {
-            for (var j = col; j <= _maxCol; j++)
-            {
-                var square = callback(GetSquare(i, j));
-                if (square != null)
-                    return square;
-            }
-        }
-
-        for (var i = 0; i < row; i++)
-        {
-            for (var j = 0; j < col; j++)
-            {
-                var square = callback(GetSquare(i, j));
-                if (square != null)
-                    return square;
-            }
         }
 
         return null;
