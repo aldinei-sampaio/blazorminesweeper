@@ -1,0 +1,27 @@
+﻿@implements IDisposable
+
+<div class="flagDisplay" title="Minas restantes">
+    <img src="images/MineLabel.png" />
+    <img src="images/Counter@(GetFirstDigit()).png" />
+    <img src="images/Counter@(GetSecondDigit()).png" />
+    <img src="images/Counter@(GetThirdDigit()).png" />
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public GameModel GameModel { get; set; } = default!;
+
+    override protected void OnParametersSet()
+    {
+        GameModel.OnFlagCountChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        GameModel.OnFlagCountChange -= StateHasChanged;
+    }
+
+    private int GetFirstDigit() => GameModel.RemainingFlags / 100;
+    private int GetSecondDigit() => (GameModel.RemainingFlags / 10) % 10;
+    private int GetThirdDigit() => GameModel.RemainingFlags % 10;
+}

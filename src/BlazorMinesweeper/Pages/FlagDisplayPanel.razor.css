@@ -1,0 +1,13 @@
+﻿.flagDisplay {
+    width: 55px;
+    height: 24px;
+    background: black;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+}
+
+img {
+    margin: 1px;
+    display: block;
+}

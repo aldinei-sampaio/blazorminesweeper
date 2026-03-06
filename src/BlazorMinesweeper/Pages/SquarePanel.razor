@@ -1,100 +1,93 @@
-﻿@using BlazorMinesweeper.Models
-@implements IDisposable
+﻿@implements IDisposable
 
-@if(Square.DisplayMode == SquareDisplayMode.Normal)
-{
-    <div class="@GetTipClass()" @onmouseup="OnClosedMouseUp" @oncontextmenu:preventDefault="true">&nbsp;</div>
-    return;
-}
+<div class="square @GetTipClass()">
+    @(SquareModel.DisplayMode switch
+    {
+        SquareDisplayMode.Normal => 
+            @<div class="closed" @onmouseup="OnClosedMouseUp" @oncontextmenu:preventDefault="true">
+                &nbsp;
+            </div>,
 
-@if(Square.DisplayMode == SquareDisplayMode.Empty)
-{
-    <div>&nbsp;</div>
-    return;
-}
+        SquareDisplayMode.Empty => 
+            @<div class="open">&nbsp;</div>,
 
-@if(Square.DisplayMode == SquareDisplayMode.Exploded)
-{
-    <img src="images/Mine.png" class="exploded" />
-    return;
-}
+        SquareDisplayMode.Exploded => 
+            @<div class="exploded">
+                <img src="images/Mine.png" />
+            </div>,
 
-@if (Square.DisplayMode == SquareDisplayMode.Mine)
-{
-    <img src="images/Mine.png" class="openned" />
-    return;
-}
+        SquareDisplayMode.Mine => 
+            @<div class="open">
+                <img src="images/Mine.png" />
+            </div>,
 
-@if (Square.DisplayMode == SquareDisplayMode.Flag)
-{
-    <img src="images/Flag.png" />
-    return;
-}
+        SquareDisplayMode.Flag =>
+            @<div class="closed">
+                <img src="images/Flag.png" />
+            </div>,
 
-@if (Square.DisplayMode == SquareDisplayMode.Unknown)
-{
-    <img src="images/Unknown.png" />
-    return;
-}
+        SquareDisplayMode.Unknown =>
+            @<div class="closed">
+                <img src="images/Unknown.png" />
+            </div>,
 
-@if (Square.DisplayMode == SquareDisplayMode.NumberActive)
-{
-    <div @onmouseup="OnOpennedMouseUp" @onmouseup:preventDefault="true">
-        <img src="images/@(Square.DisplayNumber).png" />
-    </div>
-    return;
-}
+        SquareDisplayMode.NumberActive =>
+            @<div class="open" @onmouseup="OnOpenMouseUp" @onmouseup:preventDefault="true">
+                <img src="images/@(SquareModel.DisplayNumber).png" />
+            </div>,
 
-@if (Square.DisplayMode == SquareDisplayMode.NumberInactive)
-{
-    <img src="images/@(Square.DisplayNumber)a.png" />
-    return;
-}
+        SquareDisplayMode.NumberInactive =>
+            @<div class="open">
+                <img src="images/@(SquareModel.DisplayNumber)a.png" />
+            </div>,
 
-@if (Square.DisplayMode == SquareDisplayMode.WrongFlag)
-{
-    <img src="images/WrongFlag.png" />
-    return;
-}
+        SquareDisplayMode.WrongFlag =>
+            @<div class="open">
+                <img src="images/WrongFlag.png" />
+            </div>,
+
+        _ => @<div>&nbsp;</div>
+    })
+</div>
 
 @code {
     [Parameter, EditorRequired]
-    public Board Board { get; set; } = default!;
+    public GameModel GameModel { get; set; } = default!;
 
     [Parameter, EditorRequired]
-    public Square Square { get; set; } = default!;
+    public SquareModel SquareModel { get; set; } = default!;
 
     protected override void OnParametersSet()
     {
-        Square.OnUpdate += StateHasChanged;
+        SquareModel.OnUpdate += StateHasChanged;
     }
 
     private string GetTipClass()
     {
-        return Square.TipType switch
+        return SquareModel.TipType switch
         {
-            TipType.Mine => "tip_mine",
-            TipType.Safe => "tip_safe",
+            TipType.Mine => "tip-mine",
+            TipType.Safe => "tip-safe",
             _ => string.Empty
         };
     }
 
-    private void OnOpennedMouseUp(MouseEventArgs args)
+    private void OnOpenMouseUp(MouseEventArgs args)
     {
         if (args.Buttons == 3)
-            Board.OpenNeighborhood(Square);
+            GameModel.OpenNeighborhood(SquareModel);
     }
 
     private void OnClosedMouseUp(MouseEventArgs args)
     {
         if (args.Button == 0)
-            Board.Open(Square);
+            GameModel.Open(SquareModel);
         else if (args.Button == 2)
-            Board.ToggleState(Square);
+            GameModel.ToggleState(SquareModel);
     }
 
     public void Dispose()
     { 
-        Square.OnUpdate -= StateHasChanged;
+        SquareModel.OnUpdate -= StateHasChanged;
     }
 }

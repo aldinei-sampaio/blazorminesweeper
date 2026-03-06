@@ -1,10 +1,10 @@
-﻿@using BlazorMinesweeper.Models
-@implements IDisposable
+﻿@implements IDisposable
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
-<ImagePreloader />
-
-<h3>MineField</h3>
+@if (GameSettings is null)
+{
+    return;
+}
 
 @if (showOptions)
 {
@@ -17,16 +17,16 @@
         <tr>
             <td>
                 <div class="headerPanel">
-                    <table cellspacing="0" cellpadding="0" style="width:100%">
+                    <table cellspacing="0" cellpadding="0" class="w-100">
                         <tr>
-                            <td>
-                                <FlagDisplay Board="@Board" />
+                            <td class="text-left">
+                                <FlagDisplayPanel GameModel="@GameModel" />
                             </td>
                             <td>
-                                <ResetPanel Board="@Board" OnClick="ResetClicked" />
+                                <ResetPanel GameModel="@GameModel" OnClick="ResetClicked" />
                             </td>
-                            <td>
-                                <TimerPanel BoardTimer="@Board.Timer" />
+                            <td class="text-right">
+                                <TimerPanel TimerModel="@GameModel.Timer" />
                             </td>
                         </tr>
                     </table>
@@ -34,22 +34,22 @@
             </td>
         </tr>
         <tr>
-           <td>
-                <MineField Board="@Board" />
+            <td>
+                <BoardPanel GameModel="@GameModel" />
             </td>
         </tr>
         <tr>
             <td>
                 <div class="footerPanel">
-                    <table cellspacing="0" cellpadding="0" style="width:100%">
+                    <table cellspacing="0" cellpadding="0" class="w-100">
                         <tr>
                             @if (GameSettings.AllowTips)
                             {
-                                <td>
-                                    <TipPanel Board="@Board" />
+                                <td class="text-left">
+                                    <TipPanel GameModel="@GameModel" />
                                 </td>
                             }
-                            <td style="text-align:right;">
+                            <td class="text-right">
                                 <button @onclick="() => showOptions = true" title="Opções">
                                     <img src="images/Options.png" />
                                 </button>
@@ -62,8 +62,9 @@
     </tbody>
 </table>
 
+
 @code {
-    public Board Board { get; set; } = default!;
+    public GameModel GameModel { get; set; } = default!;
     public GameSettings GameSettings { get; set; } = default!;
 
     private const string LocalStorageKey = "GameSettings";
@@ -78,34 +79,28 @@
         else
             GameSettings = new();
 
-        Board = new Board(GameSettings.BoardSetup, GameSettings.PreventImediateWin);
+        GameModel = new GameModel(GameSettings.BoardSetup, GameSettings.PreventImediateWin);
     }
 
-    public void Dispose() 
+    public void Dispose()
     {
-        Board?.Dispose();
+        GameModel?.Dispose();
     }
 
     public void OnCloseSettings(bool isModified)
     {
         showOptions = false;
+        StateHasChanged();
         if (!isModified)
             return;
 
-        Board.Reset(GameSettings.BoardSetup, GameSettings.PreventImediateWin);
+        GameModel.Reset(GameSettings.BoardSetup, GameSettings.PreventImediateWin);
         LocalStorage.SetItemAsync(LocalStorageKey, GameSettings);
-        StateHasChanged();
     }
 
     private void ResetClicked()
     {
-        Board.Reset();
+        GameModel.Reset();
         StateHasChanged();
-    }
-
-    private void TipClicked(MouseEventArgs args)
-    {
-        var square = Board.TryCreateTip();
-
     }
 }

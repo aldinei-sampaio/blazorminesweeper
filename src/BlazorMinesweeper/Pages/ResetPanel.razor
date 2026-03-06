@@ -1,9 +1,8 @@
-﻿@using BlazorMinesweeper.Models
-@implements IDisposable
+﻿@implements IDisposable
 
 <div class="resetPanel">
     <button @onclick="() => OnClick?.Invoke()" title="Reiniciar jogo">
-        @(Board.State switch
+        @(GameModel.State switch
         {
             GameState.Ready => @<img src="images/Ready.png" />,
             GameState.Started => @<img src="images/Started.png" />,
@@ -16,18 +15,18 @@
 
 @code {
     [Parameter, EditorRequired]
-    public Board Board { get; set; } = default!;
+    public GameModel GameModel { get; set; } = default!;
 
     [Parameter, EditorRequired]
     public Action? OnClick { get; set; } = default!;
 
     override protected void OnParametersSet()
     {
-        Board.OnStateChange += StateHasChanged;
+        GameModel.OnStateChange += StateHasChanged;
     }
 
     public void Dispose()
     {
-        Board.OnStateChange -= StateHasChanged;
+        GameModel.OnStateChange -= StateHasChanged;
     }
 }

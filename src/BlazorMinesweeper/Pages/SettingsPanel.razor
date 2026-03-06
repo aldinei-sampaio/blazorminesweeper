@@ -1,12 +1,10 @@
-﻿@using BlazorMinesweeper.Models
-
-<div class="optionsPanel">
-    <h4>Opções</h4>
+﻿<div class="optionsPanel">
+    <h2>Opções</h2>
     <hr />
-    <table cellspacing="0" cellpadding="0" style="width:100%">
+    <table cellspacing="0" cellpadding="0" class="w-100">
         <tbody>
             <tr>
-                <td style="text-align:left;">
+                <td class="text-left">
                     <InputRadioGroup @bind-Value="SelectedBoardSize">
                         <p>
                             <InputRadio id="options_board_begginner" Value="BoardSize.Begginer" />
@@ -14,7 +12,7 @@
                         </p>
                         <p>
                             <InputRadio id="options_board_intermediate" Value="BoardSize.Intermediate" />
-                            <label for="options_board_intermediate">Iniciante</label>
+                            <label for="options_board_intermediate">Intermediário</label>
                         </p>
                         <p>
                             <InputRadio id="options_board_expert" Value="BoardSize.Expert" />
@@ -26,15 +24,17 @@
                         </p>
                     </InputRadioGroup>
                 </td>
-                <td style="text-align:right;vertical-align:middle;">
+                <td class="text-right v-middle">
                     <p>
                         <label for="options_custom_rows">Linhas:</label>
                         <InputNumber
                             id="options_custom_rows"
                             min="@BoardSetup.Minimum.Rows"
                             max="@BoardSetup.Maximum.Rows"
+                            step="1"
                             @bind-Value="CustomRows"
-                            disabled="@(SelectedBoardSize != BoardSize.Custom)"                        
+                            disabled="@(SelectedBoardSize != BoardSize.Custom)"
+                            class="input-number"
                             />
                     </p>
                     <p>
@@ -43,8 +43,10 @@
                             id="options_custom_columns"
                             min="@BoardSetup.Minimum.Columns"
                             max="@BoardSetup.Maximum.Columns"
+                            step="1"
                             @bind-Value="CustomColumns"
                             disabled="@(SelectedBoardSize != BoardSize.Custom)"
+                            class="input-number"
                             />
                     </p>
                     <p>
@@ -53,8 +55,10 @@
                             id="options_custom_mines"
                             min="@BoardSetup.Minimum.Mines"
                             max="@BoardSetup.Maximum.Mines"
+                            step="1"
                             @bind-Value="CustomMines"
                             disabled="@(SelectedBoardSize != BoardSize.Custom)"
+                            class="input-number"
                             />
                     </p>
                 </td>
@@ -74,7 +78,7 @@
         <label for="options_auto_play">Jogo automático</label>
     </p>
     <hr />
-    <div style="text-align:right;">
+    <div class="text-right">
         <button class="primary" @onclick="OkPressed">OK</button>
         <button class="primary" @onclick="CancelPressed">Cancelar</button>
     </div>
@@ -87,12 +91,11 @@
     [Parameter, EditorRequired]
     public Action<bool>? OnClose { get; set; } = default!;
 
-    private int customRows;
-    private int customColumns;
-    private int customMines;
+    private BoardSetup boardSetup = default!;
     private bool preventImediateWin;
     private bool allowTips;
     private bool autoPlay;
+    private BoardSize boardSize;
 
     private enum BoardSize
     {
@@ -104,34 +107,33 @@
 
     protected override void OnParametersSet()
     {
-        customRows = GameSettings.BoardSetup.Rows;
-        customColumns = GameSettings.BoardSetup.Columns;
-        customMines = GameSettings.BoardSetup.Mines;
+        boardSetup = GameSettings.BoardSetup;
+        boardSize = GetBoardSize(boardSetup);
         preventImediateWin = GameSettings.PreventImediateWin;
         allowTips = GameSettings.AllowTips;
         autoPlay = GameSettings.AutoPlay;
     }
 
+    private static BoardSize GetBoardSize(BoardSetup boardSetup)
+    {
+        if (boardSetup == BoardSetup.Begginer)
+            return BoardSize.Begginer;
+        if (boardSetup == BoardSetup.Intermediate)
+            return BoardSize.Intermediate;
+        if (boardSetup == BoardSetup.Expert)
+            return BoardSize.Expert;
+        return BoardSize.Custom;
+    }
+
     private BoardSize SelectedBoardSize
     {
-        get
-        {
-            if (GameSettings.BoardSetup == BoardSetup.Begginer)
-                return BoardSize.Begginer;
-
-            if (GameSettings.BoardSetup == BoardSetup.Intermediate)
-                return BoardSize.Intermediate;
-
-            if (GameSettings.BoardSetup == BoardSetup.Expert)
-                return BoardSize.Expert;
-
-            return BoardSize.Custom;
-        }
+        get => boardSize;
         set
         {
-            if (SelectedBoardSize == value)
+            if (boardSize == value)
                 return;
 
+            boardSize = value;
             switch (value)
             {
                 case BoardSize.Begginer:
@@ -144,72 +146,59 @@
                     GameSettings.BoardSetup = BoardSetup.Expert;
                     break;
                 case BoardSize.Custom:
-                    customRows = GameSettings.BoardSetup.Rows;
-                    customColumns = GameSettings.BoardSetup.Columns;
-                    customMines = GameSettings.BoardSetup.Mines;
-                    StateHasChanged();
                     break;
             }
+            StateHasChanged();
         }
-    }
-
-    private void UpdateCustomBoardSetup()
-    {
-        GameSettings.BoardSetup = new BoardSetup(customRows, customColumns, customMines);
     }
 
     private int CustomRows
     {
-        get => customRows;
+        get => boardSetup.Rows;
         set
         {
             var newValue = Math.Clamp(value, BoardSetup.Minimum.Rows, BoardSetup.Maximum.Rows);
-            if (newValue == customRows)
+            if (newValue == boardSetup.Rows)
                 return;
-            customRows = newValue;
-            UpdateCustomBoardSetup();
+            boardSetup = boardSetup with { Rows = newValue };
         }
     }
 
     private int CustomColumns
     {
-        get => customColumns;
+        get => boardSetup.Columns;
         set
         {
             var newValue = Math.Clamp(value, BoardSetup.Minimum.Columns, BoardSetup.Maximum.Columns);
-            if (newValue == customColumns)
+            if (newValue == boardSetup.Columns)
                 return;
-            customColumns = newValue;
-            UpdateCustomBoardSetup();
+            boardSetup = boardSetup with { Columns = newValue };
         }
     }
 
     private int CustomMines
     {
-        get => customMines;
+        get => boardSetup.Mines;
         set
         {
-            var maxMines = BoardSetup.GetMaximumMines(customRows, customColumns);
+            var maxMines = BoardSetup.GetMaximumMines(boardSetup.Rows, boardSetup.Columns);
             var newValue = Math.Clamp(value, BoardSetup.Minimum.Mines, maxMines);
-            if (newValue == customMines)
+            if (newValue == boardSetup.Mines)
                 return;
-            customMines = newValue;
-            UpdateCustomBoardSetup();
+            boardSetup = boardSetup with { Mines = newValue };
         }
     }
 
     private void OkPressed(MouseEventArgs args)
     {
-        var newSetup = new BoardSetup(customRows, customColumns, customMines);
-
-        var isModified = GameSettings.BoardSetup != newSetup
+        var isModified = GameSettings.BoardSetup != boardSetup
             || GameSettings.PreventImediateWin != preventImediateWin
             || GameSettings.AllowTips != allowTips
             || GameSettings.AutoPlay != autoPlay;
 
         if (isModified)
         {
-            GameSettings.BoardSetup = newSetup;
+            GameSettings.BoardSetup = boardSetup;
             GameSettings.PreventImediateWin = preventImediateWin;
             GameSettings.AllowTips = allowTips;
             GameSettings.AutoPlay = autoPlay;

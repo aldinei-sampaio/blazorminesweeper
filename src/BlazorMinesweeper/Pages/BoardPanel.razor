@@ -1,0 +1,20 @@
+﻿<table class="fieldTable" cellspacing="0" cellpadding="0">
+    <tbody>
+        @for (var row = GameModel.MinRow; row <= GameModel.MaxRow; row++)
+        {
+            <tr>
+                @for (var column = GameModel.MinColumn; column <= GameModel.MaxColumn; column++)
+                {
+                    <td class="fieldCell">
+                        <SquarePanel GameModel="@GameModel" SquareModel="@GameModel[row, column]" />
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter, EditorRequired]
+    public GameModel GameModel { get; set; } = default!;
+}

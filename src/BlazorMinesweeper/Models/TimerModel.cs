@@ -2,9 +2,9 @@
 
 namespace BlazorMinesweeper.Models;
 
-public sealed class BoardTimer : IDisposable
+public sealed class TimerModel : IDisposable
 {
-    public event Action? OnElapsedTime;
+    public event Action? OnTick;
     public TimeSpan ElapsedTime => Stopwatch.GetElapsedTime(startTimestamp);
 
     private readonly Timer _timer;
@@ -12,13 +12,13 @@ public sealed class BoardTimer : IDisposable
     private bool _isRunning;
     private long startTimestamp = Stopwatch.GetTimestamp();
 
-    public BoardTimer()
+    public TimerModel()
     {
         _timer = new Timer(_ =>
         {
             try
             {
-                OnElapsedTime?.Invoke();
+                OnTick?.Invoke();
                 if (ElapsedTime.TotalSeconds >= 5999)
                     Stop();
             }
@@ -37,7 +37,7 @@ public sealed class BoardTimer : IDisposable
         _isRunning = true;
         startTimestamp = Stopwatch.GetTimestamp();
         _timer.Change(_interval, _interval);
-        OnElapsedTime?.Invoke();
+        OnTick?.Invoke();
     }
 
     public void Stop()
@@ -51,7 +51,7 @@ public sealed class BoardTimer : IDisposable
 
     public void Dispose()
     {
-        OnElapsedTime = null;
+        OnTick = null;
         _timer.Dispose();
     } 
 }

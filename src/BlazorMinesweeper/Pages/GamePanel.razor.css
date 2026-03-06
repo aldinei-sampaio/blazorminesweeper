@@ -1,0 +1,26 @@
+﻿.mainTable {
+    min-width: 200px;
+    border-bottom: 1px solid #C0C0C0;
+}
+
+    .mainTable td {
+        border-left: 1px solid #C0C0C0;
+        border-right: 1px solid #C0C0C0;
+        border-top: 1px solid #C0C0C0;
+    }
+
+        .mainTable td table td {
+            border: none;
+            padding: 0;
+        }
+
+.headerPanel {
+    text-align: center;
+    background-color: #D0D0D0;
+    padding: 3px;
+}
+
+.footerPanel {
+    background-color: #D0D0D0;
+    padding: 3px;
+}

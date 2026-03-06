@@ -1,17 +1,16 @@
-﻿@using BlazorMinesweeper.Models
-@implements IDisposable
+﻿@implements IDisposable
 
 <div class="timerPanel" title="Tempo decorrido">
-    <img src="images/ClockLabel.png" />
+    <img class="points" src="images/ClockLabel.png" />
     <img src="images/Counter@(minutesDigit1).png" />
     <img src="images/Counter@(minutesDigit2).png" />
     @if(pointsFlag)
     {
-        <img src="images/PointsLight.png" />
+        <img class="points" src="images/PointsLight.png" />
     }
     else
     {
-        <img src="images/PointsDark.png" />
+        <img class="points" src="images/PointsDark.png" />
     }
     <img src="images/Counter@(secondsDigit1).png" />
     <img src="images/Counter@(secondsDigit2).png" />
@@ -19,32 +18,32 @@
 
 @code {
     [Parameter, EditorRequired]
-    public BoardTimer BoardTimer { get; set; } = default!;
+    public TimerModel TimerModel { get; set; } = default!;
 
     private int secondsDigit1;
     private int secondsDigit2;
     private int minutesDigit1;
     private int minutesDigit2;
-    private bool pointsFlag;
+    private bool pointsFlag = true;
 
     override protected void OnParametersSet()
     {
-        BoardTimer.OnElapsedTime += OnElapsedTime;
+        TimerModel.OnTick += OnTick;
     }
 
-    private void OnElapsedTime()
+    private void OnTick()
     {
-        var elapsedTime = BoardTimer.ElapsedTime;
+        var elapsedTime = TimerModel.ElapsedTime;
         secondsDigit1 = elapsedTime.Seconds / 10;
         secondsDigit2 = elapsedTime.Seconds % 10;
         minutesDigit1 = elapsedTime.Minutes / 10;
         minutesDigit2 = elapsedTime.Minutes % 10;
-        pointsFlag = elapsedTime.Milliseconds >= 500;
+        pointsFlag = elapsedTime.Milliseconds < 500;
         StateHasChanged();
     }
 
     public void Dispose()
     {
-        BoardTimer.OnElapsedTime -= OnElapsedTime;
+        TimerModel.OnTick -= OnTick;
     }
 }

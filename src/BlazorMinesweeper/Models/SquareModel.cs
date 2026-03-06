@@ -1,6 +1,6 @@
 ﻿namespace BlazorMinesweeper.Models;
 
-public sealed class Square(int row, int column, int neighborsCount) : IDisposable
+public sealed class SquareModel(int row, int column, int neighborsCount) : IDisposable
 {
     private bool _isOpenned = false;
     private bool _isRevealed = false;

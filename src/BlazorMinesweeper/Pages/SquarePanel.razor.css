@@ -1,0 +1,59 @@
+﻿.square {
+    display: block;
+    width: 20px;
+    height: 20px;
+}
+
+.closed {
+    background: url(Images/NormalButtonReady.png) no-repeat top;
+    width: 100%;
+    height: 100%;
+}
+
+    .closed:hover {
+        background: url(Images/NormalButtonHover.png) no-repeat top;
+    }
+
+    .closed:active {
+        background: url(Images/NormalButtonPressed.png) no-repeat top;
+    }
+
+.tip-safe {
+    background: url(Images/TipGreen.png) no-repeat top;
+}
+
+    .tip-safe.closed {
+        background: url(Images/TipButtonReady.png) no-repeat top;
+    }
+
+        .tip-safe.closed:hover {
+            background: url(Images/TipButtonHover.png) no-repeat top;
+        }
+
+        .tip-safe.closed:active {
+            background: url(Images/TipButtonPressed.png) no-repeat top;
+        }
+
+.tip-mine {
+    background: url(Images/TipRed.png) no-repeat top;
+}
+
+    .tip-mine.closed {
+        background: url(Images/TipRedButtonReady.png) no-repeat top;
+    }
+
+        .tip-mine.closed:hover {
+            background: url(Images/TipRedButtonHover.png) no-repeat top;
+        }
+
+        .tip-mine.closed:active {
+            background: url(Images/TipRedButtonPressed.png) no-repeat top;
+        }
+
+.exploded {
+    background-color: red;
+}
+
+.open {
+    background-color: #e5efde;
+}

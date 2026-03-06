@@ -1,0 +1,20 @@
+﻿.fieldTable {
+    border-bottom: 1px solid #E0E0E0;
+    border-right: 1px solid #E0E0E0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.fieldCell {
+    width: 20px;
+    height: 20px;
+    font-size: 10pt;
+    font-weight: bold;
+    border-top: 1px solid #E0E0E0;
+    border-left: 1px solid #E0E0E0;
+    border-bottom: none;
+    border-right: none;
+    text-align: center;
+    vertical-align: middle;
+    padding: 1px;
+}

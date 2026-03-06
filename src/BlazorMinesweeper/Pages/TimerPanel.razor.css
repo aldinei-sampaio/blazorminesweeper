@@ -1,0 +1,18 @@
+﻿.timerPanel {
+    margin-left: auto;
+    width: 73px;
+    height: 24px;
+    background: black;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+}
+
+img {
+    margin: 1px;
+    display: block;
+}
+
+.points {
+    margin: 1px;
+}

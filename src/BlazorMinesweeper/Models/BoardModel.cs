@@ -1,8 +1,8 @@
 ﻿namespace BlazorMinesweeper.Models;
 
-public sealed class BoardSquares : IDisposable
+public sealed class BoardModel : IDisposable
 {
-    private readonly Square[,] _squares;
+    private readonly SquareModel[,] _squares;
 
     public int Rows { get; }
     public int Columns { get; }
@@ -12,14 +12,14 @@ public sealed class BoardSquares : IDisposable
     public int MaxColumn => Columns - 1;
     public int SquareCount => Rows * Columns;
 
-    public BoardSquares(int rows, int columns)
+    public BoardModel(int rows, int columns)
     {
         if (rows <= 0 || columns <= 0)
             throw new ArgumentException("rows e cols precisam ser maiores que zero");
 
         Rows = rows;
         Columns = columns;
-        _squares = new Square[rows, columns];
+        _squares = new SquareModel[rows, columns];
 
         for (var i = MinRow; i <= MaxRow; i++)
         {
@@ -28,12 +28,12 @@ public sealed class BoardSquares : IDisposable
             {
                 var colCorner = (j == MinColumn || j == MaxColumn);
                 var neighborCount = rowCorner ? (colCorner ? 3 : 5) : (colCorner ? 5 : 8);
-                _squares[i, j] = new Square(i, j, neighborCount);
+                _squares[i, j] = new SquareModel(i, j, neighborCount);
             }
         }
     }
 
-    public Square this[int row, int column]
+    public SquareModel this[int row, int column]
     {
         get
         {
@@ -49,7 +49,7 @@ public sealed class BoardSquares : IDisposable
 
     public void Dispose() => ForEach(i => i.Dispose());
 
-    public void ForEach(Action<Square> callbackfn)
+    public void ForEach(Action<SquareModel> callbackfn)
     {
         for (var i = MinRow; i <= MaxRow; i++)
         {
@@ -60,7 +60,7 @@ public sealed class BoardSquares : IDisposable
         }
     }
 
-    public void ForEachInVicinity(Square item, Func<Square, bool> callbackfn)
+    public void ForEachInVicinity(SquareModel item, Func<SquareModel, bool> callbackfn)
     {
         for (var i = Math.Max(item.Row - 1, MinRow); i <= Math.Min(item.Row + 1, MaxRow); i++)
         {
@@ -75,7 +75,7 @@ public sealed class BoardSquares : IDisposable
         }
     }
 
-    public void ForEachInVicinity(Square item, Action<Square> callbackfn)
+    public void ForEachInVicinity(SquareModel item, Action<SquareModel> callbackfn)
     {
         for (var i = Math.Max(item.Row - 1, MinRow); i <= Math.Min(item.Row + 1, MaxRow); i++)
         {
@@ -89,7 +89,7 @@ public sealed class BoardSquares : IDisposable
         }
     }
 
-    public Square? Find(int startingRow, int startingColumn, Func<Square, Square?> callback)
+    public SquareModel? Find(int startingRow, int startingColumn, Func<SquareModel, SquareModel?> callback)
     {
         for (var i = startingRow; i <= MaxRow; i++)
         {

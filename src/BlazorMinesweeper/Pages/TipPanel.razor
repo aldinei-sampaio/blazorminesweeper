@@ -1,7 +1,6 @@
-﻿@using BlazorMinesweeper.Models
-@implements IDisposable
+﻿@implements IDisposable
 
-@if (Board.State != GameState.Started)
+@if (GameModel.State != GameState.Started)
 {
     return;
 }
@@ -17,18 +16,18 @@
 
 @code {
     [Parameter, EditorRequired]
-    public Board Board { get; set; } = default!;
+    public GameModel GameModel { get; set; } = default!;
 
     private bool showError = false;
 
     override protected void OnParametersSet()
     {
-        Board.OnBoardChange += BoardStateChanged;
+        GameModel.OnBoardChange += BoardStateChanged;
     }
 
     public void Dispose()
     {
-        Board.OnBoardChange -= BoardStateChanged;
+        GameModel.OnBoardChange -= BoardStateChanged;
     }
 
     private void BoardStateChanged()
@@ -39,6 +38,6 @@
 
     private void ButtonClicked(MouseEventArgs args)
     {
-        showError = !Board.TryCreateTip();
+        showError = !GameModel.TryCreateTip();
     }
 }
