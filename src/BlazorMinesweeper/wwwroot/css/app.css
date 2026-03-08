@@ -21,6 +21,8 @@ html, body {
 
 img {
     vertical-align: middle;
+    -webkit-user-drag: none;
+    user-drag: none;
 }
 
 td {
@@ -29,6 +31,24 @@ td {
     padding: 0;
     margin: 0;
 }
+
+button {
+    cursor: pointer;
+    background: #d4d0c8;
+    border: 1px solid;
+    border-color: #fff #404040 #404040 #fff;
+    box-shadow: none;
+    padding: 2px;
+}
+
+    button:hover {
+        background: #c8c6c0;
+    }
+
+    button:active {
+        border-color: #404040 #fff #fff #404040;
+        background: #c8c6c0;
+    }
 
 #blazor-error-ui {
     color-scheme: light only;

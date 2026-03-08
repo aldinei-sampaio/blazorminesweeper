@@ -6,9 +6,10 @@ public sealed class TimerModel : IDisposable
 {
     public event Action? OnTick;
     public TimeSpan ElapsedTime => Stopwatch.GetElapsedTime(startTimestamp);
+    public bool IsRunning => _isRunning;
 
     private readonly Timer _timer;
-    private readonly TimeSpan _interval = TimeSpan.FromMilliseconds(0);
+    private readonly TimeSpan _interval = TimeSpan.FromMilliseconds(500);
     private bool _isRunning;
     private long startTimestamp = Stopwatch.GetTimestamp();
 
@@ -47,6 +48,13 @@ public sealed class TimerModel : IDisposable
 
         _isRunning = false;
         _timer.Change(Timeout.Infinite, Timeout.Infinite);
+        OnTick?.Invoke();
+    }
+
+    public void Reset()
+    {
+        startTimestamp = Stopwatch.GetTimestamp();
+        OnTick?.Invoke();
     }
 
     public void Dispose()

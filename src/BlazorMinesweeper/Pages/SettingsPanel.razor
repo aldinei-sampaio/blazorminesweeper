@@ -26,56 +26,66 @@
                 </td>
                 <td class="text-right v-middle">
                     <p>
-                        <label for="options_custom_rows">Linhas:</label>
-                        <InputNumber
-                            id="options_custom_rows"
-                            min="@BoardSetup.Minimum.Rows"
-                            max="@BoardSetup.Maximum.Rows"
-                            step="1"
-                            @bind-Value="CustomRows"
-                            disabled="@(SelectedBoardSize != BoardSize.Custom)"
-                            class="input-number"
-                            />
+                        <label>
+                            Linhas:
+                            <InputNumber
+                                id="options_custom_rows"
+                                min="@BoardSetup.Minimum.Rows"
+                                max="@BoardSetup.Maximum.Rows"
+                                step="1"
+                                @bind-Value="CustomRows"
+                                disabled="@(SelectedBoardSize != BoardSize.Custom)"
+                                class="input-number"
+                                />
+                        </label>
                     </p>
                     <p>
-                        <label for="options_custom_columns">Colunas:</label>
-                        <InputNumber
-                            id="options_custom_columns"
-                            min="@BoardSetup.Minimum.Columns"
-                            max="@BoardSetup.Maximum.Columns"
-                            step="1"
-                            @bind-Value="CustomColumns"
-                            disabled="@(SelectedBoardSize != BoardSize.Custom)"
-                            class="input-number"
-                            />
+                        <label>
+                            Colunas:
+                            <InputNumber
+                                min="@BoardSetup.Minimum.Columns"
+                                max="@BoardSetup.Maximum.Columns"
+                                step="1"
+                                @bind-Value="CustomColumns"
+                                disabled="@(SelectedBoardSize != BoardSize.Custom)"
+                                class="input-number"
+                                />
+                        </label>
                     </p>
                     <p>
-                        <label for="options_custom_mines">Minas:</label>
-                        <InputNumber
-                            id="options_custom_mines"
-                            min="@BoardSetup.Minimum.Mines"
-                            max="@BoardSetup.Maximum.Mines"
-                            step="1"
-                            @bind-Value="CustomMines"
-                            disabled="@(SelectedBoardSize != BoardSize.Custom)"
-                            class="input-number"
-                            />
+                        <label>
+                            Minas:
+                            <InputNumber
+                                min="@BoardSetup.Minimum.Mines"
+                                max="@maxMines"
+                                step="1"
+                                @bind-Value="CustomMines"
+                                disabled="@(SelectedBoardSize != BoardSize.Custom)"
+                                class="input-number"
+                                />
+                        </label>
                     </p>
                 </td>
             </tr>
         </tbody>
     </table>
     <p>
-        <InputCheckbox id="options_prevent_imediate_win" @bind-Value="preventImediateWin" />
-        <label for="options_prevent_imediate_win">Impedir fim de jogo no primeiro clique</label>
+        <label>
+            <InputCheckbox @bind-Value="preventImmediateGameOver" />
+            Impedir fim de jogo no primeiro clique
+        </label>
     </p>
     <p>
-        <InputCheckbox id="options_allow_tips" @bind-Value="allowTips" />
-        <label for="options_allow_tips">Exibir opção de dicas</label>
+        <label>
+            <InputCheckbox @bind-Value="allowTips" />
+            Ativar dicas
+        </label>
     </p>
     <p>
-        <InputCheckbox id="options_auto_play" @bind-Value="autoPlay" />
-        <label for="options_auto_play">Jogo automático</label>
+        <label>
+            <InputCheckbox @bind-Value="allowAutoPlay" />
+            Ativar jogo automático
+        </label>
     </p>
     <hr />
     <div class="text-right">
@@ -92,10 +102,11 @@
     public Action<bool>? OnClose { get; set; } = default!;
 
     private BoardSetup boardSetup = default!;
-    private bool preventImediateWin;
+    private bool preventImmediateGameOver;
     private bool allowTips;
-    private bool autoPlay;
+    private bool allowAutoPlay;
     private BoardSize boardSize;
+    private int maxMines;
 
     private enum BoardSize
     {
@@ -109,9 +120,10 @@
     {
         boardSetup = GameSettings.BoardSetup;
         boardSize = GetBoardSize(boardSetup);
-        preventImediateWin = GameSettings.PreventImediateWin;
+        preventImmediateGameOver = GameSettings.PreventImmediateGameOver;
         allowTips = GameSettings.AllowTips;
-        autoPlay = GameSettings.AutoPlay;
+        allowAutoPlay = GameSettings.AllowAutoPlay;
+        maxMines = BoardSetup.GetMaximumMines(boardSetup.Rows, boardSetup.Columns);
     }
 
     private static BoardSize GetBoardSize(BoardSetup boardSetup)
@@ -137,17 +149,18 @@
             switch (value)
             {
                 case BoardSize.Begginer:
-                    GameSettings.BoardSetup = BoardSetup.Begginer;
+                    boardSetup = BoardSetup.Begginer;
                     break;
                 case BoardSize.Intermediate:
-                    GameSettings.BoardSetup = BoardSetup.Intermediate;
+                    boardSetup = BoardSetup.Intermediate;
                     break;
                 case BoardSize.Expert:
-                    GameSettings.BoardSetup = BoardSetup.Expert;
+                    boardSetup = BoardSetup.Expert;
                     break;
                 case BoardSize.Custom:
                     break;
             }
+            maxMines = BoardSetup.GetMaximumMines(boardSetup.Rows, boardSetup.Columns);
             StateHasChanged();
         }
     }
@@ -160,7 +173,9 @@
             var newValue = Math.Clamp(value, BoardSetup.Minimum.Rows, BoardSetup.Maximum.Rows);
             if (newValue == boardSetup.Rows)
                 return;
-            boardSetup = boardSetup with { Rows = newValue };
+            maxMines = BoardSetup.GetMaximumMines(newValue, boardSetup.Columns);
+            var mineCount = Math.Min(boardSetup.Mines, maxMines);
+            boardSetup = boardSetup with { Rows = newValue, Mines = mineCount };
         }
     }
 
@@ -172,7 +187,9 @@
             var newValue = Math.Clamp(value, BoardSetup.Minimum.Columns, BoardSetup.Maximum.Columns);
             if (newValue == boardSetup.Columns)
                 return;
-            boardSetup = boardSetup with { Columns = newValue };
+            maxMines = BoardSetup.GetMaximumMines(boardSetup.Rows, newValue);
+            var mineCount = Math.Min(boardSetup.Mines, maxMines);
+            boardSetup = boardSetup with { Columns = newValue, Mines = mineCount };
         }
     }
 
@@ -192,16 +209,16 @@
     private void OkPressed(MouseEventArgs args)
     {
         var isModified = GameSettings.BoardSetup != boardSetup
-            || GameSettings.PreventImediateWin != preventImediateWin
+            || GameSettings.PreventImmediateGameOver != preventImmediateGameOver
             || GameSettings.AllowTips != allowTips
-            || GameSettings.AutoPlay != autoPlay;
+            || GameSettings.AllowAutoPlay != allowAutoPlay;
 
         if (isModified)
         {
             GameSettings.BoardSetup = boardSetup;
-            GameSettings.PreventImediateWin = preventImediateWin;
+            GameSettings.PreventImmediateGameOver = preventImmediateGameOver;
             GameSettings.AllowTips = allowTips;
-            GameSettings.AutoPlay = autoPlay;
+            GameSettings.AllowAutoPlay = allowAutoPlay;
         }
 
         OnClose?.Invoke(isModified);

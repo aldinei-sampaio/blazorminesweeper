@@ -91,23 +91,30 @@ public sealed class BoardModel : IDisposable
 
     public SquareModel? Find(int startingRow, int startingColumn, Func<SquareModel, SquareModel?> callback)
     {
-        for (var i = startingRow; i <= MaxRow; i++)
-        {
-            for (var j = startingColumn; j <= MaxColumn; j++)
-            {
-                var square = callback(_squares[i, j]);
-                if (square != null)
-                    return square;
-            }
-        }
+#if DEBUG
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(startingRow, MaxRow);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(startingColumn, MaxColumn);
+        ArgumentOutOfRangeException.ThrowIfLessThan(startingRow, MinRow);
+        ArgumentOutOfRangeException.ThrowIfLessThan(startingColumn, MinColumn);
+#endif
 
-        for (var i = 0; i < startingRow; i++)
+        var currentRow = startingRow;
+        var currentColumn = startingColumn;
+
+        for (var i = MinRow; i <= MaxRow; i++)
         {
-            for (var j = 0; j < startingColumn; j++)
+            for (var j = MinColumn; j <= MaxColumn; j++)
             {
-                var square = callback(_squares[i, j]);
+                var square = callback(_squares[currentRow, currentColumn]);
                 if (square != null)
                     return square;
+
+                currentColumn++;
+                if (currentColumn > MaxColumn)
+                {
+                    currentColumn = MinColumn;
+                    currentRow = currentRow == MaxRow ? MinRow : currentRow + 1;
+                }
             }
         }
 

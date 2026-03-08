@@ -1,0 +1,10 @@
+﻿button {
+    margin-right: 3px;
+}
+
+.message {
+    display: inline-block;
+    font-size: smaller;
+    margin-left: 2px;
+    font-style: italic;
+}

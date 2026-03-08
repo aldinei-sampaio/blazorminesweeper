@@ -6,8 +6,8 @@
 }
 
 .fieldCell {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     font-size: 10pt;
     font-weight: bold;
     border-top: 1px solid #E0E0E0;
@@ -16,5 +16,5 @@
     border-right: none;
     text-align: center;
     vertical-align: middle;
-    padding: 1px;
+    padding: 0;
 }

@@ -2,6 +2,7 @@
 
 <div class="flagDisplay" title="Minas restantes">
     <img src="images/MineLabel.png" />
+    <img src="images/Counter.png" />
     <img src="images/Counter@(GetFirstDigit()).png" />
     <img src="images/Counter@(GetSecondDigit()).png" />
     <img src="images/Counter@(GetThirdDigit()).png" />
@@ -21,7 +22,22 @@
         GameModel.OnFlagCountChange -= StateHasChanged;
     }
 
-    private int GetFirstDigit() => GameModel.RemainingFlags / 100;
-    private int GetSecondDigit() => (GameModel.RemainingFlags / 10) % 10;
+    private int? GetFirstDigit()
+    {
+        var remainingFlags = GameModel.RemainingFlags;
+        if (remainingFlags < 100)
+            return null;
+        return remainingFlags / 100;
+    }
+
+    private int? GetSecondDigit()
+    {
+        var remainingFlags = GameModel.RemainingFlags;
+        if (remainingFlags < 10)
+            return null;
+        return (remainingFlags / 10) % 10;
+    }
+         
+    
     private int GetThirdDigit() => GameModel.RemainingFlags % 10;
 }

@@ -1,36 +1,51 @@
 ﻿.square {
     display: block;
-    width: 20px;
-    height: 20px;
-}
-
-.closed {
-    background: url(Images/NormalButtonReady.png) no-repeat top;
     width: 100%;
     height: 100%;
 }
 
-    .closed:hover {
+.square-closed {
+    padding: 1px;
+}
+
+.square-button {
+    background: url(Images/NormalButtonReady.png) no-repeat top;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+    .square-button:hover {
         background: url(Images/NormalButtonHover.png) no-repeat top;
     }
 
-    .closed:active {
+    .square-button:active {
         background: url(Images/NormalButtonPressed.png) no-repeat top;
     }
+
+.square-open {
+    background-color: #e5efde;
+}
+
+.square-exploded {
+    background-color: red;
+}
+
 
 .tip-safe {
     background: url(Images/TipGreen.png) no-repeat top;
 }
 
-    .tip-safe.closed {
+    .tip-safe.square-button {
         background: url(Images/TipButtonReady.png) no-repeat top;
     }
 
-        .tip-safe.closed:hover {
+        .tip-safe.square-button:hover {
             background: url(Images/TipButtonHover.png) no-repeat top;
         }
 
-        .tip-safe.closed:active {
+        .tip-safe.square-button:active {
             background: url(Images/TipButtonPressed.png) no-repeat top;
         }
 
@@ -38,22 +53,14 @@
     background: url(Images/TipRed.png) no-repeat top;
 }
 
-    .tip-mine.closed {
+    .tip-mine.square-button {
         background: url(Images/TipRedButtonReady.png) no-repeat top;
     }
 
-        .tip-mine.closed:hover {
+        .tip-mine.square-button:hover {
             background: url(Images/TipRedButtonHover.png) no-repeat top;
         }
 
-        .tip-mine.closed:active {
+        .tip-mine.square-button:active {
             background: url(Images/TipRedButtonPressed.png) no-repeat top;
         }
-
-.exploded {
-    background-color: red;
-}
-
-.open {
-    background-color: #e5efde;
-}

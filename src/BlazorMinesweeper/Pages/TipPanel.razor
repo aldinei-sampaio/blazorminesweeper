@@ -1,43 +1,82 @@
 ﻿@implements IDisposable
 
-@if (GameModel.State != GameState.Started)
+@if (GameModel.State == GameState.Ready)
 {
-    return;
+    if (GameSettings.AllowAutoPlay)
+    {
+        <button @onclick="AutoPlayClicked" title="Jogo automático">
+            <img src="images/AutoPlay.png" />
+        </button>
+    }
+}
+else if (GameModel.State == GameState.Started)
+{
+    @if (autoPlaying)
+    {
+        <div class="message">Jogo automático em andamento</div>
+    }
+    else
+    {
+        if (GameSettings.AllowTips)
+        {
+            <button @onclick="TipClicked" title="Dica">
+                <img src="images/Tip.png" />
+            </button>
+        }
+    }
 }
 
-<button @onclick="ButtonClicked" title="Dica">
-    <img src="images/Tip.png" />
-</button>
-
-@if (showError)
+@if (errorMessage is not null)
 {
-    <div>Dica indisponível</div>
+    <div class="message">@errorMessage</div>
 }
 
 @code {
     [Parameter, EditorRequired]
     public GameModel GameModel { get; set; } = default!;
 
-    private bool showError = false;
+    [Parameter, EditorRequired]
+    public GameSettings GameSettings { get; set; } = default!;
+
+    private string? errorMessage;
+    private bool autoPlaying = false;
 
     override protected void OnParametersSet()
     {
-        GameModel.OnBoardChange += BoardStateChanged;
+        GameModel.OnBoardChange += OnBoardChanged;
+        GameModel.OnStateChange += OnStateChanged;
     }
 
     public void Dispose()
     {
-        GameModel.OnBoardChange -= BoardStateChanged;
+        GameModel.OnBoardChange -= OnBoardChanged;
+        GameModel.OnStateChange -= OnStateChanged;
     }
 
-    private void BoardStateChanged()
+    private void OnBoardChanged()
     {
-        showError = false;
+        errorMessage = null;
         StateHasChanged();
     }
 
-    private void ButtonClicked(MouseEventArgs args)
+    private void OnStateChanged()
     {
-        showError = !GameModel.TryCreateTip();
+        if (GameModel.State == GameState.Ready)
+            errorMessage = null;
+    }
+
+    private void TipClicked(MouseEventArgs args)
+    {
+        if (GameModel.TryCreateTip() is null)
+            errorMessage = "Dica indisponível";
+    }
+
+    private async Task AutoPlayClicked(MouseEventArgs args)
+    {
+        autoPlaying = true;
+        await GameModel.AutoPlayAsync();
+        autoPlaying = false;
+        if (GameModel.State == GameState.Started)
+            errorMessage = "Jogo automático interrompido";
     }
 }

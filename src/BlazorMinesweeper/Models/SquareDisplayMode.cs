@@ -9,6 +9,7 @@ public enum SquareDisplayMode
     Exploded,
     NumberActive,
     NumberInactive,
+    RightFlag,
     WrongFlag,
     Empty
 }

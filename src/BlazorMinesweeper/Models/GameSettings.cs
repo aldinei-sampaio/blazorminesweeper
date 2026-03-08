@@ -3,7 +3,7 @@
 public sealed class GameSettings
 {
     public BoardSetup BoardSetup { get; set; } = BoardSetup.Begginer;
-    public bool PreventImediateWin { get; set; } = true;
+    public bool PreventImmediateGameOver { get; set; } = true;
     public bool AllowTips { get; set; } = true;
-    public bool AutoPlay { get; set; } = false;
+    public bool AllowAutoPlay { get; set; } = false;
 }

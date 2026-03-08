@@ -3,7 +3,7 @@
 public sealed class GameModel : IDisposable
 {
     private BoardSetup _setup;
-    private bool _preventImediateWin;
+    private bool _preventImmediateGameOver;
     private BoardModel _board;
 
     private int _openCount = 0;
@@ -19,10 +19,10 @@ public sealed class GameModel : IDisposable
     public TimerModel Timer { get; } = new();
     public GameState State => _state;
 
-    public GameModel(BoardSetup setup, bool preventImediateWin)
+    public GameModel(BoardSetup setup, bool preventImmediateGameOver)
     {
         _setup = setup;
-        _preventImediateWin = preventImediateWin;
+        _preventImmediateGameOver = preventImmediateGameOver;
         _board = new(setup.Rows, setup.Columns);
         Initialize();
     }
@@ -33,7 +33,7 @@ public sealed class GameModel : IDisposable
         Initialize();
     }
 
-    public void Reset(BoardSetup setup, bool preventImediateWin)
+    public void Reset(BoardSetup setup, bool preventImmediateGameOver)
     {
         if (setup.Rows != _board.Rows || setup.Columns != _board.Columns)
         {
@@ -45,7 +45,7 @@ public sealed class GameModel : IDisposable
             _board.Reset();
         }
         _setup = setup;
-        _preventImediateWin = preventImediateWin;
+        _preventImmediateGameOver = preventImmediateGameOver;
         Initialize();
     }
 
@@ -55,6 +55,7 @@ public sealed class GameModel : IDisposable
         _flaggedCount = 0;
         _putMinesLater = 0;
         _mineCount = 0;
+        Timer.Reset();
         PutMines();
         if (_state != GameState.Ready)
         {
@@ -85,7 +86,7 @@ public sealed class GameModel : IDisposable
         var maximumMines = BoardSetup.GetMaximumMines(_setup.Rows, _setup.Columns);
         var mineCount = Math.Clamp(_setup.Mines, BoardSetup.Minimum.Mines, maximumMines);
 
-        if (_preventImediateWin) 
+        if (_preventImmediateGameOver) 
             _putMinesLater += mineCount;
         else
             PutAllMines(mineCount);
@@ -105,10 +106,10 @@ public sealed class GameModel : IDisposable
         }
     }
 
-    private static (int Row, int Column) GetRandomCoordinates()
+    private (int Row, int Column) GetRandomCoordinates()
     {
-        var row = Random.Shared.Next(0, 100);
-        var column = Random.Shared.Next(0, 100);
+        var row = Random.Shared.Next(_board.MinRow, _board.MaxRow + 1);
+        var column = Random.Shared.Next(_board.MinColumn, _board.MaxColumn + 1);
         return (row, column);
     }
 
@@ -170,10 +171,7 @@ public sealed class GameModel : IDisposable
 
         if (square.HasMine)
         {
-            Timer.Stop();
-            _state = GameState.Lost;
-            _board.Reveal();
-            OnStateChange?.Invoke();
+            GameOver(GameState.Lost);
             return;
         }
 
@@ -185,12 +183,15 @@ public sealed class GameModel : IDisposable
             OpenEmptyNeighbors(square);
 
         if (_openCount == OpenableCount)
-        {
-            Timer.Stop();
-            _state = GameState.Won;
-            OnStateChange?.Invoke();
-            return;
-        }
+            GameOver(GameState.Won);
+    }
+
+    private void GameOver(GameState state)
+    {
+        Timer.Stop();
+        _state = state;
+        _board.Reveal();
+        OnStateChange?.Invoke();
     }
 
     private void OpenSquare(SquareModel square)
@@ -203,7 +204,7 @@ public sealed class GameModel : IDisposable
     {
         _board.ForEachInVicinity(square, (item) => 
         {
-            if (!item.IsOpen && item.State == SquareState.Normal && item.DisplayNumber == 0)
+            if (!item.IsOpen && item.State == SquareState.Normal && !item.HasMine && item.DisplayNumber == 0)
             {
                 OpenSquare(item);
                 _openCount++;
@@ -270,32 +271,28 @@ public sealed class GameModel : IDisposable
             _board.ForEachInVicinity(square, i => i.DecrementNeighborsClosed());
             OnFlagCountChange?.Invoke();
         }
-        else
-        {
-            return;
-        }
         RegisterStart();
         square.ToggleState();
         OnBoardChange?.Invoke();
     }
 
-    public bool TryCreateTip()
+    public SquareModel? TryCreateTip()
     {
         if (_openCount == 0)
-            return false;
+            return null;
 
         var (row, column) = GetRandomCoordinates();
         var square = _board.Find(row, column, TryCreateTipInVincinity);
         if (square is null)
-            return false;
+            return null;
 
         OnBoardChange?.Invoke();
-        return true;
+        return square;
     }
 
     private SquareModel? TryCreateTipInVincinity(SquareModel square)
     {
-        if (!square.IsOpen)
+        if (!square.IsOpen || square.DisplayNumber == 0)
             return null;
 
         var flagCount = 0;
@@ -303,7 +300,7 @@ public sealed class GameModel : IDisposable
         SquareModel? candidate = null;
 
         _board.ForEachInVicinity(square, i => {
-            if (!square.IsOpen)
+            if (!i.IsOpen)
             {
                 closedCount++;
                 if (i.State == SquareState.Flagged)
@@ -329,5 +326,37 @@ public sealed class GameModel : IDisposable
         }
 
         return null;
+    }
+
+    public async Task AutoPlayAsync()
+    {
+        if (State == GameState.Ready)
+        {
+            var (row, column) = GetRandomCoordinates();
+            Open(_board[row, column]);
+        }
+
+        while (State == GameState.Started)
+        {
+            await Task.Delay(250);
+
+            var square = TryCreateTip();
+            if (square is null)
+                break;
+
+            if (square.TipType == TipType.Mine)
+                ToggleState(square);
+            else if (square.TipType == TipType.Safe)
+                Open(square);
+        }
+
+        if (State == GameState.Won && _flaggedCount < _mineCount)
+        {
+            _board.ForEach(i =>
+            {
+                if (i.HasMine && i.State == SquareState.Normal)
+                    ToggleState(i);
+            });
+        }
     }
 }

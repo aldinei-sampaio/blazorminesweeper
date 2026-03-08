@@ -13,7 +13,7 @@ public sealed class SquareModel(int row, int column, int neighborsCount) : IDisp
     public bool HasMine { get; set; } = false;
     public bool HasExploded { get; set; } = false;
     public int DisplayNumber { get; set; } = 0;
-    public bool HasNeighborsClosed => _neighborsClosed > 0;
+    public bool HasNeighborsClosed => !_isRevealed && _neighborsClosed > 0;
     public SquareState State => _state;
     public bool IsOpen => _isOpenned;
     public int Row => row;
@@ -35,7 +35,7 @@ public sealed class SquareModel(int row, int column, int neighborsCount) : IDisp
         if (_isRevealed)
             return;
         _isRevealed = true;
-        if (!_isOpenned)
+        if (!_isOpenned || _neighborsClosed > 0)
             OnUpdate?.Invoke();
     }
 
@@ -65,7 +65,7 @@ public sealed class SquareModel(int row, int column, int neighborsCount) : IDisp
                 if (_state == SquareState.Flagged)
                 {
                     if (HasMine)
-                        return SquareDisplayMode.Flag;
+                        return SquareDisplayMode.RightFlag;
                     
                     return SquareDisplayMode.WrongFlag;
                 }
@@ -91,6 +91,7 @@ public sealed class SquareModel(int row, int column, int neighborsCount) : IDisp
 
     public void Reset()
     {
+        _isRevealed = false;
         _isOpenned = false;
         _state = SquareState.Normal;
         HasMine = false;

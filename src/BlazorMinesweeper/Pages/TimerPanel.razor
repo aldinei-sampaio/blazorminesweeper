@@ -38,7 +38,7 @@
         secondsDigit2 = elapsedTime.Seconds % 10;
         minutesDigit1 = elapsedTime.Minutes / 10;
         minutesDigit2 = elapsedTime.Minutes % 10;
-        pointsFlag = elapsedTime.Milliseconds < 500;
+        pointsFlag = !TimerModel.IsRunning || elapsedTime.Milliseconds < 500;
         StateHasChanged();
     }
 

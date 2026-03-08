@@ -2,7 +2,7 @@
     border: 1px solid black;
     box-shadow: 10px 10px 5px gray;
     padding: 10px;
-    background: #D0D0D0;
+    background: #d4d0c8;
     width: 350px;
     font-size: 9pt;
 }
@@ -24,8 +24,8 @@ p {
     padding: 0;
 }
 
-.input-number input {
-    width: 70px;
+::deep input[type="number"] {
+    width: 40px;
     display: inline-block;
 }
 
@@ -33,6 +33,4 @@ button {
     width: 70px;
     padding: 3px;
     margin-left: 3px;
-    background: #C0C0C0;
-    border: 1px solid #A0A0A0;
 }

@@ -1,54 +1,80 @@
 ﻿@implements IDisposable
 
-<div class="square @GetTipClass()">
-    @(SquareModel.DisplayMode switch
-    {
-        SquareDisplayMode.Normal => 
-            @<div class="closed" @onmouseup="OnClosedMouseUp" @oncontextmenu:preventDefault="true">
-                &nbsp;
-            </div>,
+@(SquareModel.DisplayMode switch
+{
+    SquareDisplayMode.Normal =>
+        @<div class="square square-closed">
+            <div id="square-button"
+                 class="square-button @GetTipClass()"
+                 @onmouseup:stopPropagation="true"
+                 @onmouseup:preventDefault="true"
+                 @onmouseup="OnClosedMouseUp">
+            </div>
+        </div>,
 
-        SquareDisplayMode.Empty => 
-            @<div class="open">&nbsp;</div>,
-
-        SquareDisplayMode.Exploded => 
-            @<div class="exploded">
-                <img src="images/Mine.png" />
-            </div>,
-
-        SquareDisplayMode.Mine => 
-            @<div class="open">
-                <img src="images/Mine.png" />
-            </div>,
-
-        SquareDisplayMode.Flag =>
-            @<div class="closed">
+    SquareDisplayMode.Flag =>
+        @<div class="square square-closed">
+            <div id="square-button"
+                 class="square-button"
+                 @onmouseup:stopPropagation="true"
+                 @onmouseup:preventDefault="true"
+                 @onmouseup="OnClosedMouseUp">
                 <img src="images/Flag.png" />
-            </div>,
+            </div>
+        </div>,
 
-        SquareDisplayMode.Unknown =>
-            @<div class="closed">
+    SquareDisplayMode.Unknown =>
+        @<div class="square square-closed">
+            <div id="square-button"
+                 class="square-button"
+                 @onmouseup:stopPropagation="true"
+                 @onmouseup:preventDefault="true"
+                 @onmouseup="OnClosedMouseUp">
                 <img src="images/Unknown.png" />
-            </div>,
+            </div>
+        </div>,
 
-        SquareDisplayMode.NumberActive =>
-            @<div class="open" @onmouseup="OnOpenMouseUp" @onmouseup:preventDefault="true">
-                <img src="images/@(SquareModel.DisplayNumber).png" />
-            </div>,
+    SquareDisplayMode.Empty => 
+        @<div class="square square-open"></div>,
 
-        SquareDisplayMode.NumberInactive =>
-            @<div class="open">
-                <img src="images/@(SquareModel.DisplayNumber)a.png" />
-            </div>,
+    SquareDisplayMode.Exploded => 
+        @<div class="square square-exploded">
+            <img src="images/Mine.png" />
+        </div>,
 
-        SquareDisplayMode.WrongFlag =>
-            @<div class="open">
-                <img src="images/WrongFlag.png" />
-            </div>,
+    SquareDisplayMode.Mine => 
+        @<div class="square square-open">
+            <img src="images/Mine.png" />
+        </div>,
 
-        _ => @<div>&nbsp;</div>
-    })
-</div>
+    SquareDisplayMode.NumberActive =>
+        @<div class="square square-open"
+              @onmouseup:stopPropagation="true"
+              @onmouseup:preventDefault="true"
+              @onmouseup="OnOpenMouseUp"
+              @onmousedown:stopPropagation="true"
+              @onmousedown:preventDefault="true"
+              @onmousedown="OnOpenMouseDown">
+            <img src="images/@(SquareModel.DisplayNumber).png" />
+        </div>,
+
+    SquareDisplayMode.NumberInactive =>
+        @<div class="square square-open">
+            <img src="images/@(SquareModel.DisplayNumber)a.png" />
+        </div>,
+
+    SquareDisplayMode.RightFlag =>
+        @<div class="square square-open">
+            <img src="images/Flag.png" />
+        </div>,
+
+    SquareDisplayMode.WrongFlag =>
+        @<div class="square square-open">
+            <img src="images/WrongFlag.png" />
+        </div>,
+
+    _ => @<div class="square square-open"></div>
+})
 
 @code {
     [Parameter, EditorRequired]
@@ -56,6 +82,9 @@
 
     [Parameter, EditorRequired]
     public SquareModel SquareModel { get; set; } = default!;
+
+    private bool leftPressed = false;
+    private bool rightPressed = false;
 
     protected override void OnParametersSet()
     {
@@ -74,20 +103,37 @@
 
     private void OnOpenMouseUp(MouseEventArgs args)
     {
-        if (args.Buttons == 3)
+        if (leftPressed && rightPressed)
             GameModel.OpenNeighborhood(SquareModel);
+
+        leftPressed = false;
+        rightPressed = false;
     }
 
-    private void OnClosedMouseUp(MouseEventArgs args)
+    private void OnOpenMouseDown(MouseEventArgs args)
     {
         if (args.Button == 0)
-            GameModel.Open(SquareModel);
+            leftPressed = true;
         else if (args.Button == 2)
-            GameModel.ToggleState(SquareModel);
+            rightPressed = true;
     }
 
     public void Dispose()
     { 
         SquareModel.OnUpdate -= StateHasChanged;
+    }
+
+    private void OnClosedMouseUp(MouseEventArgs args)
+    {
+        if (args.Button == 0)
+        {
+            if (SquareModel.DisplayMode == SquareDisplayMode.Normal)
+                GameModel.Open(SquareModel);
+
+            return;
+        }
+
+        if (args.Button == 2)
+            GameModel.ToggleState(SquareModel);
     }
 }
