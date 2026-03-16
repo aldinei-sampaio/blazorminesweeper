@@ -18,3 +18,31 @@
     vertical-align: middle;
     padding: 0;
 }
+
+/* Ensure SquarePanel contents also fill the cell and remain square on larger screens */
+.square {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Mobile: make cells stretch to fit width and keep square aspect ratio */
+@media (max-width: 767px) {
+    .fieldTable {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    /* Use the --cols CSS variable set on the table to divide width evenly */
+    .fieldCell {
+        width: calc(100% / var(--cols));
+        padding: 0;
+    }
+
+    /* Keep the SquarePanel content square using aspect-ratio */
+    .square {
+        aspect-ratio: 1 / 1;
+        width: 100%;
+        height: auto;
+    }
+}

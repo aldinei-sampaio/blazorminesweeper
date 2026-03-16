@@ -1,4 +1,4 @@
-﻿<table class="fieldTable" cellspacing="0" cellpadding="0">
+﻿<table class="fieldTable" cellspacing="0" cellpadding="0" style="--cols:@GameModel.Columns">
     <tbody>
         @for (var row = GameModel.MinRow; row <= GameModel.MaxRow; row++)
         {
@@ -6,7 +6,9 @@
                 @for (var column = GameModel.MinColumn; column <= GameModel.MaxColumn; column++)
                 {
                     <td class="fieldCell">
-                        <SquarePanel GameModel="@GameModel" SquareModel="@GameModel[row, column]" />
+                        <div class="square">
+                            <SquarePanel GameModel="@GameModel" SquareModel="@GameModel[row, column]" />
+                        </div>
                     </td>
                 }
             </tr>

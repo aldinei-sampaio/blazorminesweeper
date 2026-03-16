@@ -4,8 +4,7 @@
 {
     SquareDisplayMode.Normal =>
         @<div class="square square-closed">
-            <div id="square-button"
-                 class="square-button @GetTipClass()"
+            <div class="square square-button @GetTipClass()"
                  @onmouseup:stopPropagation="true"
                  @onmouseup:preventDefault="true"
                  @onmouseup="OnClosedMouseUp">
@@ -14,8 +13,7 @@
 
     SquareDisplayMode.Flag =>
         @<div class="square square-closed">
-            <div id="square-button"
-                 class="square-button"
+            <div class="square square-button"
                  @onmouseup:stopPropagation="true"
                  @onmouseup:preventDefault="true"
                  @onmouseup="OnClosedMouseUp">
@@ -25,8 +23,7 @@
 
     SquareDisplayMode.Unknown =>
         @<div class="square square-closed">
-            <div id="square-button"
-                 class="square-button"
+            <div class="square square-button"
                  @onmouseup:stopPropagation="true"
                  @onmouseup:preventDefault="true"
                  @onmouseup="OnClosedMouseUp">

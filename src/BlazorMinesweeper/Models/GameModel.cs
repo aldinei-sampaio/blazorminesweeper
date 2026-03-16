@@ -76,6 +76,8 @@ public sealed class GameModel : IDisposable
     public int MaxRow => _board.MaxRow;
     public int MinColumn => _board.MinColumn;
     public int MaxColumn => _board.MaxColumn;
+    public int Columns => _board.Columns;
+    public int Rows => _board.Rows;
 
     public SquareModel this[int row, int column] => _board[row, column];
 
