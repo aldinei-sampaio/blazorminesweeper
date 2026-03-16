@@ -19,7 +19,7 @@ jobs:
 
       - name: Publish project
         working-directory: src/BlazorMinesweeper
-        run: dotnet publish -c Release
+        run: dotnet publish -c Release /p:Version=1.0.${{ github.run_number }}
 
       - name: Prepare output
         run: |
