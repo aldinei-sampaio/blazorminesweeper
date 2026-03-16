@@ -9,7 +9,7 @@
 }
 
 .square-button {
-    background: url(Images/NormalButtonReady.png) no-repeat top;
+    background: url(images/NormalButtonReady.png) no-repeat top;
     height: 100%;
     width: 100%;
     box-sizing: border-box;
@@ -17,11 +17,11 @@
 }
 
     .square-button:hover {
-        background: url(Images/NormalButtonHover.png) no-repeat top;
+        background: url(images/NormalButtonHover.png) no-repeat top;
     }
 
     .square-button:active {
-        background: url(Images/NormalButtonPressed.png) no-repeat top;
+        background: url(images/NormalButtonPressed.png) no-repeat top;
     }
 
 .square-open {
@@ -34,33 +34,33 @@
 
 
 .tip-safe {
-    background: url(Images/TipGreen.png) no-repeat top;
+    background: url(images/TipGreen.png) no-repeat top;
 }
 
     .tip-safe.square-button {
-        background: url(Images/TipButtonReady.png) no-repeat top;
+        background: url(images/TipButtonReady.png) no-repeat top;
     }
 
         .tip-safe.square-button:hover {
-            background: url(Images/TipButtonHover.png) no-repeat top;
+            background: url(images/TipButtonHover.png) no-repeat top;
         }
 
         .tip-safe.square-button:active {
-            background: url(Images/TipButtonPressed.png) no-repeat top;
+            background: url(images/TipButtonPressed.png) no-repeat top;
         }
 
 .tip-mine {
-    background: url(Images/TipRed.png) no-repeat top;
+    background: url(images/TipRed.png) no-repeat top;
 }
 
     .tip-mine.square-button {
-        background: url(Images/TipRedButtonReady.png) no-repeat top;
+        background: url(images/TipRedButtonReady.png) no-repeat top;
     }
 
         .tip-mine.square-button:hover {
-            background: url(Images/TipRedButtonHover.png) no-repeat top;
+            background: url(images/TipRedButtonHover.png) no-repeat top;
         }
 
         .tip-mine.square-button:active {
-            background: url(Images/TipRedButtonPressed.png) no-repeat top;
+            background: url(images/TipRedButtonPressed.png) no-repeat top;
         }
