@@ -1,23 +1,23 @@
 ﻿@using Microsoft.AspNetCore.Components
 
-<div class="image-preloader">
-    @if (!isLoaded)
-    {
+@if (!isLoaded)
+{
+    <div class="image-preloader">
         <div class="progress-wrapper">
             <div class="progress">
                 <div class="progress-fill" style="width:@ProgressPercent%"></div>
             </div>
             <div class="progress-text">Loading images: @loadedCount / @totalCount (@ProgressPercent%)</div>
         </div>
-    }
+    </div>
+}
 
-    @foreach (var src in ImageSources)
-    {
-        <img class="preload-img" src="@src"
-             @onload="@(()=>OnImageFinished(src, true))"
-             @onerror="@(()=>OnImageFinished(src, false))" />
-    }
-</div>
+@foreach (var src in ImageSources)
+{
+    <img class="preload-img" src="@src"
+            @onload="@(() => OnImageFinished(src, true))"
+            @onerror="@(() => OnImageFinished(src, false))" />
+}
 
 @code {
     [Parameter]
