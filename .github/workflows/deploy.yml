@@ -21,6 +21,10 @@ jobs:
         working-directory: src/BlazorMinesweeper
         run: dotnet publish -c Release
 
+      - name: Remove sourceMappingURL
+        run: |
+          find src/BlazorMinesweeper/bin/Release/net10.0/publish/wwwroot/_framework -type f -name "*.js" -exec sed -i '/sourceMappingURL/d' {} \;
+
       - name: Prepare output
         run: |
           cp src/BlazorMinesweeper/bin/Release/net10.0/publish/wwwroot/index.html src/BlazorMinesweeper/bin/Release/net10.0/publish/wwwroot/404.html
