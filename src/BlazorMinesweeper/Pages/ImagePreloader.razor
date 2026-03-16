@@ -1,56 +1,110 @@
-﻿<link rel="preload" as="image" href="images/1.png" />
-<link rel="preload" as="image" href="images/2.png" />
-<link rel="preload" as="image" href="images/3.png" />
-<link rel="preload" as="image" href="images/4.png" />
-<link rel="preload" as="image" href="images/5.png" />
-<link rel="preload" as="image" href="images/6.png" />
-<link rel="preload" as="image" href="images/7.png" />
-<link rel="preload" as="image" href="images/8.png" />
-<link rel="preload" as="image" href="images/1a.png" />
-<link rel="preload" as="image" href="images/2a.png" />
-<link rel="preload" as="image" href="images/3a.png" />
-<link rel="preload" as="image" href="images/4a.png" />
-<link rel="preload" as="image" href="images/5a.png" />
-<link rel="preload" as="image" href="images/6a.png" />
-<link rel="preload" as="image" href="images/7a.png" />
-<link rel="preload" as="image" href="images/8a.png" />
-<link rel="preload" as="image" href="images/Mine.png" />
-<link rel="preload" as="image" href="images/Flag.png" />
-<link rel="preload" as="image" href="images/Unknown.png" />
-<link rel="preload" as="image" href="images/WrongFlag.png" />
-<link rel="preload" as="image" href="images/Counter.png" />
-<link rel="preload" as="image" href="images/Counter0.png" />
-<link rel="preload" as="image" href="images/Counter1.png" />
-<link rel="preload" as="image" href="images/Counter2.png" />
-<link rel="preload" as="image" href="images/Counter3.png" />
-<link rel="preload" as="image" href="images/Counter4.png" />
-<link rel="preload" as="image" href="images/Counter5.png" />
-<link rel="preload" as="image" href="images/Counter6.png" />
-<link rel="preload" as="image" href="images/Counter7.png" />
-<link rel="preload" as="image" href="images/Counter8.png" />
-<link rel="preload" as="image" href="images/Counter9.png" />
-<link rel="preload" as="image" href="images/Ready.png" />
-<link rel="preload" as="image" href="images/Started.png" />
-<link rel="preload" as="image" href="images/Won.png" />
-<link rel="preload" as="image" href="images/Lost.png" />
-<link rel="preload" as="image" href="images/MineLabel.png" />
-<link rel="preload" as="image" href="images/ClockLabel.png" />
-<link rel="preload" as="image" href="images/Tip.png" />
-<link rel="preload" as="image" href="images/Options.png" />
-<link rel="preload" as="image" href="images/NormalButtonReady.png" />
-<link rel="preload" as="image" href="images/NormalButtonHover.png" />
-<link rel="preload" as="image" href="images/NormalButtonPressed.png" />
-<link rel="preload" as="image" href="images/NormalButtonDisabled.png" />
-<link rel="preload" as="image" href="images/TipButtonReady.png" />
-<link rel="preload" as="image" href="images/TipButtonHover.png" />
-<link rel="preload" as="image" href="images/TipButtonPressed.png" />
-<link rel="preload" as="image" href="images/TipButtonDisabled.png" />
-<link rel="preload" as="image" href="images/TipGreen.png" />
-<link rel="preload" as="image" href="images/TipRedButtonReady.png" />
-<link rel="preload" as="image" href="images/TipRedButtonHover.png" />
-<link rel="preload" as="image" href="images/TipRedButtonPressed.png" />
-<link rel="preload" as="image" href="images/TipRedButtonDisabled.png" />
-<link rel="preload" as="image" href="images/TipRed.png" />
-<link rel="preload" as="image" href="images/PointsLight.png" />
-<link rel="preload" as="image" href="images/PointsDark.png" />
-<link rel="preload" as="image" href="images/AutoPlay.png" />
+﻿@using Microsoft.AspNetCore.Components
+
+<div class="image-preloader">
+    @if (!isLoaded)
+    {
+        <div class="progress-wrapper">
+            <div class="progress">
+                <div class="progress-fill" style="width:@ProgressPercent%"></div>
+            </div>
+            <div class="progress-text">Loading images: @loadedCount / @totalCount (@ProgressPercent%)</div>
+        </div>
+    }
+    else
+    {
+        <div class="progress-complete">Images preloaded</div>
+    }
+
+    @foreach (var src in ImageSources)
+    {
+        <img class="preload-img" src="@src"
+             @onload="@(()=>OnImageFinished(src, true))"
+             @onerror="@(()=>OnImageFinished(src, false))" />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback Loaded { get; set; }
+
+    // List of images to preload
+    private readonly string[] ImageSources = new[]
+    {
+        "images/1.png",
+        "images/2.png",
+        "images/3.png",
+        "images/4.png",
+        "images/5.png",
+        "images/6.png",
+        "images/7.png",
+        "images/8.png",
+        "images/1a.png",
+        "images/2a.png",
+        "images/3a.png",
+        "images/4a.png",
+        "images/5a.png",
+        "images/6a.png",
+        "images/7a.png",
+        "images/8a.png",
+        "images/Mine.png",
+        "images/Flag.png",
+        "images/Unknown.png",
+        "images/WrongFlag.png",
+        "images/Counter.png",
+        "images/Counter0.png",
+        "images/Counter1.png",
+        "images/Counter2.png",
+        "images/Counter3.png",
+        "images/Counter4.png",
+        "images/Counter5.png",
+        "images/Counter6.png",
+        "images/Counter7.png",
+        "images/Counter8.png",
+        "images/Counter9.png",
+        "images/Ready.png",
+        "images/Started.png",
+        "images/Won.png",
+        "images/Lost.png",
+        "images/MineLabel.png",
+        "images/ClockLabel.png",
+        "images/Tip.png",
+        "images/Options.png",
+        "images/NormalButtonReady.png",
+        "images/NormalButtonHover.png",
+        "images/NormalButtonPressed.png",
+        "images/NormalButtonDisabled.png",
+        "images/TipButtonReady.png",
+        "images/TipButtonHover.png",
+        "images/TipButtonPressed.png",
+        "images/TipButtonDisabled.png",
+        "images/TipGreen.png",
+        "images/TipRedButtonReady.png",
+        "images/TipRedButtonHover.png",
+        "images/TipRedButtonPressed.png",
+        "images/TipRedButtonDisabled.png",
+        "images/TipRed.png",
+        "images/PointsLight.png",
+        "images/PointsDark.png",
+        "images/AutoPlay.png",
+    };
+
+    private int loadedCount = 0;
+    private int totalCount => ImageSources.Length;
+    private bool isLoaded = false;
+
+    private int ProgressPercent => totalCount == 0 ? 100 : (int)((loadedCount * 100.0) / totalCount);
+
+    private void OnImageFinished(string src, bool success)
+    {
+        // Count both success and error as finished so the preloader doesn't hang on missing resources
+        loadedCount++;
+        if (!isLoaded && loadedCount >= totalCount)
+        {
+            isLoaded = true;
+            _ = Loaded.InvokeAsync(null);
+        }
+
+        // Update UI
+        StateHasChanged();
+    }
+}

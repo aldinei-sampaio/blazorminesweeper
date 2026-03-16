@@ -1,8 +1,23 @@
 ﻿@page "/"
 
-<ImagePreloader />
-
 <h1>Campo Minado em Blazor</h1>
 <p>Versão 1.0</p>
 
-<GamePanel />
+@if (!imagesLoaded)
+{
+    <ImagePreloader Loaded="ImagesLoaded" />
+}
+else
+{
+    <GamePanel />
+}
+
+@code {
+    private bool imagesLoaded = false;
+
+    private void ImagesLoaded()
+    {
+        imagesLoaded = true;
+        StateHasChanged();
+    }
+}

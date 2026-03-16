@@ -1,0 +1,39 @@
+.image-preloader {
+    display:flex;
+    padding:8px;
+}
+
+.progress-wrapper {
+    width:100%;
+    max-width:420px;
+}
+
+.progress {
+    background: #eee;
+    border: 1px solid #ccc;
+    height: 18px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background: #4caf50;
+    height: 100%;
+    transition: width 200ms linear;
+}
+
+.progress-text {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.progress-complete {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.preload-img {
+    display: none;
+}
