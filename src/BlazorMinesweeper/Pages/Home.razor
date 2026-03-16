@@ -1,7 +1,7 @@
 ﻿@page "/"
 
 <h1>Campo Minado em Blazor</h1>
-<p>Versão 1.0</p>
+<p>Versão @GetVersion()</p>
 
 <ImagePreloader Loaded="ImagesLoaded" />
 
@@ -18,4 +18,6 @@
         imagesLoaded = true;
         StateHasChanged();
     }
+
+    private string GetVersion() => System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
 }

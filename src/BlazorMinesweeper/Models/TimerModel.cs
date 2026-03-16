@@ -54,7 +54,10 @@ public sealed class TimerModel : IDisposable
     public void Reset()
     {
         startTimestamp = Stopwatch.GetTimestamp();
-        Stop();
+        if (_isRunning)
+            Stop();
+        else
+            OnTick?.Invoke();
     }
 
     public void Dispose()
